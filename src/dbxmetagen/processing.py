@@ -1975,10 +1975,11 @@ def get_generated_metadata_data_aware(
     chunked_dfs = chunk_df(df, config.columns_per_call)
     for i, chunk in enumerate(chunked_dfs):
         sampled_chunk = sample_df(config, chunk, nrows, config.sample_size)
-        # blarg 6
         config.i += 1
         print(config.i, "creating prompt")
         prompt = PromptFactory.create_prompt(config, sampled_chunk, full_table_name)
+        # blarg 6
+
         prompt_messages = prompt.create_prompt_template(config)
         check_token_length_against_num_words(prompt_messages, config)
         if config.registered_model_name != "default":

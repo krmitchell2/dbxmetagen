@@ -83,6 +83,16 @@ def get_analyzer_engine(add_pci: bool = True, add_phi: bool = True) -> AnalyzerE
 
     if add_phi:
         # PHI patterns for medical data
+        print("")
+        print("")
+        print("=============================================================")
+        print("PHI patterns for medical data")
+        print("=============================================================")
+
+        print("")
+        print("")
+
+
         phi_patterns = [
             Pattern(name="mrn", regex=r"\bMRN[:\s]*\d{6,10}\b", score=0.8),
             Pattern(
@@ -248,7 +258,7 @@ def classify_column(
 
     detected_types = set()
     detected_entities = set()
-    results = analyze_column(analyzer, column_data, score_threshold=score_threshold)
+    results = analyze_column(config, analyzer, column_data, score_threshold=score_threshold)
 
     for cell_results in results:
         for res in cell_results:
