@@ -2883,8 +2883,11 @@ def setup_queue(config: MetadataConfig) -> List[str]:
     # Expand schema wildcards in config table names as well
     config.i += 1
     print(config.i, "expand_schema_wildcards")
+    
+    config_table_names = expand_schema_wildcards(config, config_table_names)
+    config.i += 1
+    print(config.i, "load tables names from csv")
     # blarg here
-    config_table_names = expand_schema_wildcards(config_table_names)
     file_table_names = load_table_names_from_csv(config.source_file_path)
     
     # If include_previously_failed_tables is enabled, also include failed/abandoned tables
@@ -3056,7 +3059,7 @@ def load_table_names_from_csv(csv_file_path):
         return []
 
 
-def is_schema_wildcard(table_name: str) -> bool:
+def is_schema_wildcard(config, table_name: str) -> bool:
     """
     Check if a table name is a schema wildcard pattern (catalog.schema.*).
 
@@ -3066,10 +3069,15 @@ def is_schema_wildcard(table_name: str) -> bool:
     Returns:
         bool: True if the table name is a schema wildcard pattern.
     """
-    return table_name.strip().endswith(".*") and table_name.count(".") == 2
+    config.i += 1
+    print(config.i, "inside is_schema_wildcard")
+    result = table_name.strip().endswith(".*") and table_name.count(".") == 2
+    config.i += 1
+    print(config.i, "result", result)
+    return result
 
 
-def get_tables_in_schema(catalog_name: str, schema_name: str) -> List[str]:
+def get_tables_in_schema(config, catalog_name: str, schema_name: str) -> List[str]:
     """
     Get all table names in a given catalog and schema.
 
@@ -3080,30 +3088,42 @@ def get_tables_in_schema(catalog_name: str, schema_name: str) -> List[str]:
     Returns:
         List[str]: A list of fully qualified table names.
     """
+    config.i += 1
+    print(config.i, "inside get_tables_in_schema")
     spark = SparkSession.builder.getOrCreate()
 
     try:
         # Use SHOW TABLES to get all tables in the schema
+        config.i += 1
+        print(config.i, "show tables in schema")
         tables_df = spark.sql(f"SHOW TABLES IN {catalog_name}.{schema_name}")
 
         # Extract table names and create fully qualified names
+        config.i += 1
+        print(config.i, "extract tables and get fully qualified names")
         table_names = []
         for row in tables_df.collect():
             table_name = row["tableName"]
             fully_qualified_name = f"{catalog_name}.{schema_name}.{table_name}"
+            config.i += 1
+            print(config.i, "append fully qualified name to config")
             table_names.append(fully_qualified_name)
-
+        config.i += 1
+        print(config.i, "feedback")
         print(f"Found {len(table_names)} tables in schema {catalog_name}.{schema_name}")
         return table_names
 
     except Exception as e:
+        config.i += 1
+        print(config.i, "Error get_tables_in_schema")
+        print(e)
         print(
             f"Error retrieving tables from schema {catalog_name}.{schema_name}: {str(e)}"
         )
         return []
 
 
-def expand_schema_wildcards(table_names: List[str]) -> List[str]:
+def expand_schema_wildcards(config, table_names: List[str]) -> List[str]:
     """
     Expand schema wildcard patterns in a list of table names.
 
@@ -3113,16 +3133,22 @@ def expand_schema_wildcards(table_names: List[str]) -> List[str]:
     Returns:
         List[str]: Expanded list of table names with wildcards resolved.
     """
+    config.i += 1
+    print(config.i, "in expand_schema_wildcards")
     expanded_names = []
 
     for table_name in table_names:
+        config.i += 1
+        print(config.i, "table_name", table_name)
         if is_schema_wildcard(table_name):
             # Extract catalog and schema from the wildcard pattern
             parts = table_name.replace(".*", "").split(".")
             if len(parts) == 2:
                 catalog_name, schema_name = parts
                 # Get all tables in the schema
-                schema_tables = get_tables_in_schema(catalog_name, schema_name)
+                config.i += 1
+                print(config.i, "get all tables in the schema")
+                schema_tables = get_tables_in_schema(config, catalog_name, schema_name)
                 expanded_names.extend(schema_tables)
                 print(f"Expanded {table_name} to {len(schema_tables)} tables")
             else:
