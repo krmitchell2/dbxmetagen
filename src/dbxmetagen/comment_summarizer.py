@@ -60,7 +60,9 @@ class TableCommentSummarizer:
         except json.JSONDecodeError as e:
             raise ValueError(f"JSON decode error: {e}")
 
-    def summarize_comments(self, table_name: str) -> str:
+    def summarize_comments(config, self, table_name: str) -> str:
+        config.i += 1
+        print(config.i, "TableCommentSummarizer.summarize_comments")
         table_df = self.df.filter(self.df["table"] == table_name)
 
         # Limit to first 25 columns to keep prompt size reasonable

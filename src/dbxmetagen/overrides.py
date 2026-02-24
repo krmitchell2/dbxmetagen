@@ -21,6 +21,8 @@ def override_metadata_from_csv(
     Returns:
         DataFrame: The updated DataFrame with overridden type and classification.
     """
+    config.i += 1
+    print(config.i, "override_metadata_from_csv")
     import os
 
     # Check if CSV file exists - if not, return DataFrame unchanged
@@ -68,6 +70,8 @@ def override_metadata_from_csv(
 
 
 def apply_overrides_with_loop(df, csv_dict, config):
+    config.i += 1
+    print(config.i, "apply_overrides_with_loop")
     if not csv_dict:
         return df
 
@@ -100,7 +104,7 @@ def apply_overrides_with_loop(df, csv_dict, config):
                 type_override = str(type_override)
 
             try:
-                condition = build_condition(df, table, column, schema, catalog)
+                condition = build_condition(config,df, table, column, schema, catalog)
 
                 # Apply classification override only if not null
                 if classification_override is not None and not pd.isna(
@@ -145,7 +149,7 @@ def apply_overrides_with_loop(df, csv_dict, config):
             comment_override = str(comment_override)
 
             try:
-                condition = build_condition(df, table, column, schema, catalog)
+                condition = build_condition(config,df, table, column, schema, catalog)
                 # CRITICAL: Cast the literal to string explicitly for serverless compatibility
                 df = df.withColumn(
                     "column_content",
@@ -185,7 +189,7 @@ def apply_overrides_with_loop(df, csv_dict, config):
 
             try:
                 # Build condition for table-level override (no column)
-                condition = build_condition(df, table, None, schema, catalog)
+                condition = build_condition(config,df, table, None, schema, catalog)
 
                 # Apply domain override
                 if domain_override is not None and not pd.isna(domain_override):
@@ -262,7 +266,7 @@ def apply_overrides_with_joins(df: DataFrame, csv_spark_df: DataFrame) -> DataFr
     return df
 
 
-def build_condition(df, table, column, schema, catalog):
+def build_condition(config, df, table, column, schema, catalog):
     """
     Builds the condition for the DataFrame filtering.
 
@@ -284,6 +288,8 @@ def build_condition(df, table, column, schema, catalog):
     Raises:
         ValueError: If the combination of inputs is not one of the supported patterns.
     """
+    config.i += 1
+    print(config.i, "build_condition")
     table = table if table else None
     schema = schema if schema else None
     catalog = catalog if catalog else None

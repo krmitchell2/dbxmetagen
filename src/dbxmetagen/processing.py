@@ -396,6 +396,7 @@ def sample_df(config, df: DataFrame, nrows: int, sample_size: int = 5) -> DataFr
 
 
 def append_table_row(
+    config,
     rows: List[Row],
     full_table_name: str,
     response: Dict[str, Any],
@@ -412,6 +413,8 @@ def append_table_row(
     Returns:
         List[Row]: The updated list of rows with the new table row appended.
     """
+    config.i += 1
+    print(config.i, "starting Standard flow for comment and pi modes....")
     row = Row(
         table=full_table_name,
         tokenized_table=tokenized_full_table_name,
@@ -490,6 +493,8 @@ def append_column_rows(
     Returns:
         List[Row]: The updated list of rows with the new column rows appended.
     """
+    config.i += 1
+    print(config.i, "append_column_rows")
     # Parse presidio results for PI mode
     presidio_map = {}
     if (
@@ -563,6 +568,8 @@ def define_row_schema(config):
     Returns:
         StructType: The schema for the row DataFrame.
     """
+    config.i += 1
+    print(config.i, "define_row_schema")
     df_schema = None
     if config.mode == "pi":
         df_schema = StructType(
@@ -617,6 +624,8 @@ def rows_to_df(rows: List[Row], config: MetadataConfig) -> DataFrame:
     Returns:
         DataFrame: The Spark DataFrame created from the list of rows.
     """
+    config.i += 1
+    print(config.i, "rows_to_df")
     spark = SparkSession.builder.getOrCreate()
     if len(rows) == 0:
         return None
@@ -646,7 +655,7 @@ def rows_to_df(rows: List[Row], config: MetadataConfig) -> DataFrame:
         return df
 
 
-def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
+def add_ddl_to_column_comment_df(config, df: DataFrame, ddl_column: str) -> DataFrame:
     """
     Adds a DDL statement to a DataFrame for column comment.
 
@@ -657,6 +666,8 @@ def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
     Returns:
         DataFrame: The updated DataFrame with the DDL statement added.
     """
+    config.i += 1
+    print(config.i, "add_ddl_to_column_comment_df")
     if "column_content" in df.columns:
         df = df.withColumn(
             "column_content",
@@ -676,7 +687,7 @@ def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
     return result_df
 
 
-def add_ddl_to_table_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
+def add_ddl_to_table_comment_df(config, df: DataFrame, ddl_column: str) -> DataFrame:
     """
     Adds a DDL statement to a DataFrame for table comment.
 
@@ -687,6 +698,8 @@ def add_ddl_to_table_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
     Returns:
         DataFrame: The updated DataFrame with the DDL statement added.
     """
+    config.i += 1
+    print(config.i, "add_ddl_to_table_comment")
     if df is not None and "column_content" in df.columns:
         df = df.withColumn(
             "column_content",
@@ -744,6 +757,8 @@ def add_column_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame
     Returns:
         DataFrame: The updated DataFrame with the DDL statement added.
     """
+    # HEREEE
+
     # Create UDF with config-specific tag names
     generate_pi_ddl = udf(_create_pi_information_ddl_func(config), StringType())
 
@@ -1285,6 +1300,8 @@ def _export_table_to_tsv(df, config):
 
 
 def eval_disable_medical_information_value(config: MetadataConfig) -> bool:
+    config.i += 1
+    print(config.i, "eval_disable_medical_information_value")
     return (
         config.disable_medical_information_value == "true"
         or config.disable_medical_information_value
@@ -1439,6 +1456,8 @@ def set_protected_classification(df: DataFrame, config: MetadataConfig) -> DataF
     """
     Set the classification to protected.
     """
+    config.i += 1
+    print(config.i, "set_protected_classification")
     if not df:
         return None
 
@@ -1462,6 +1481,8 @@ def replace_medical_information_with_phi(
     """
     Replace the medical information with phi.
     """
+    config.i += 1
+    print(config.i, "replace_medical_information_with_phi")
     if not df:
         return None
 
@@ -2063,7 +2084,7 @@ def review_and_generate_metadata(
         tokenized_full_table_name = replace_catalog_name(config, full_table_name)
         if config.mode == "comment":
             table_rows = append_table_row(
-                table_rows, full_table_name, response, tokenized_full_table_name
+                config, table_rows, full_table_name, response, tokenized_full_table_name
             )
         column_rows = append_column_rows(
             config, column_rows, full_table_name, response, tokenized_full_table_name
@@ -2082,6 +2103,8 @@ def replace_catalog_name(config, full_table_name):
     Returns:
         str: The string with the catalog name replaced.
     """
+    config.i += 1
+    print(config.i, "replace_catalog_name")
     catalog_tokenizable = config.catalog_tokenizable
     parts = full_table_name.split(".")
     if len(parts) != 3:
@@ -2143,6 +2166,8 @@ def apply_comment_ddl(df: DataFrame, config: MetadataConfig) -> dict:
     Returns:
         dict: Summary of DDL application including any missing tags
     """
+    config.i += 1
+    print(config.i, "apply_connemt_ddl")
     spark = SparkSession.builder.getOrCreate()
     ddl_statements = df.select("ddl").collect()
     missing_tags = []
@@ -2207,8 +2232,11 @@ def split_and_hardcode_df(df, config):
 
     Does not handle all mode types, need to manage the conditional in process_and_add_ddl.
     """
+    config.i += 1
+    print(config.i, "process_and_add_ddl")
     if df is not None:
-        df = split_name_for_df(df)
+        df = split_name_for_df(config, df)
+        # blarggggg
         df = hardcode_classification(df, config)
         return df
 
@@ -2235,6 +2263,13 @@ def process_and_add_ddl(config: MetadataConfig, table_name: str) -> DataFrame:
     config.i += 1
     print(config.i, "process_and_add_ddl")
     column_df, table_df = review_and_generate_metadata(config, table_name)
+    print("")
+    print("")
+    config.i += 1
+    print(config.i, "review and generate metadata complete")
+    print("")
+    print("")
+
     column_df = split_and_hardcode_df(column_df, config)
     table_df = split_and_hardcode_df(table_df, config)
 
@@ -2243,7 +2278,7 @@ def process_and_add_ddl(config: MetadataConfig, table_name: str) -> DataFrame:
         column_df = override_metadata_from_csv(
             column_df, config.override_csv_path, config
         )
-
+    # blarg here fr
     dfs = add_ddl_to_dfs(config, table_df, column_df, table_name)
     return dfs
 
@@ -2259,12 +2294,15 @@ def hardcode_classification(df, config):
     Returns:
         DataFrame: The DataFrame with the classification hardcoded.
     """
+    config.i += 1
+    print(config.i, "hardcode_classification")
+    # blarg wow
     df = replace_medical_information_with_phi(df, config)
     df = set_protected_classification(df, config)
     return df
 
 
-def split_name_for_df(df):
+def split_name_for_df(config, df):
     """
     Splits the fully scoped table name for the DataFrame.
 
@@ -2274,6 +2312,8 @@ def split_name_for_df(df):
     Returns:
         DataFrame: The DataFrame with the fully scoped table name split.
     """
+    config.i += 1
+    print(config.i, "split_name_for_df")
     if df is not None:
         has_column_content = "column_content" in df.columns
         if has_column_content:
@@ -2281,7 +2321,7 @@ def split_name_for_df(df):
                 df.select("column_content").schema.fields[0].dataType
             )
 
-        df = split_fully_scoped_table_name(df, "table")
+        df = split_fully_scoped_table_name(config,df, "table")
 
         if has_column_content and "column_content" in df.columns:
             df = df.withColumn("column_content", col("column_content").cast("string"))
@@ -2311,12 +2351,14 @@ def add_ddl_to_dfs(config, table_df, column_df, table_name):
     Returns:
         dict: A dictionary containing the DataFrames.
     """
+    config.i += 1
+    print(config.i, "add_ddl_to_dfs")
     dfs = {}
     if config.mode == "comment":
 
         if table_df is not None:
             summarized_table_df = summarize_table_content(table_df, config, table_name)
-            summarized_table_df = split_name_for_df(summarized_table_df)
+            summarized_table_df = split_name_for_df(config, summarized_table_df)
         else:
             summarized_table_df = None
 
@@ -2325,10 +2367,10 @@ def add_ddl_to_dfs(config, table_df, column_df, table_name):
                 "column_content", col("column_content").cast("string")
             )
 
-        dfs["comment_table_df"] = add_ddl_to_table_comment_df(
+        dfs["comment_table_df"] = add_ddl_to_table_comment_df(config,
             summarized_table_df, "ddl"
         )
-        dfs["comment_column_df"] = add_ddl_to_column_comment_df(column_df, "ddl")
+        dfs["comment_column_df"] = add_ddl_to_column_comment_df(config,column_df, "ddl")
 
         if config.apply_ddl:
             dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
@@ -2410,6 +2452,8 @@ def apply_ddl_to_tables(dfs, config):
     Returns:
         dict: Summary of DDL application results
     """
+    config.i += 1
+    print(config.i, "apply_ddl_to_tables")
     table_df = dfs.get(f"{config.mode}_table_df")
     column_df = dfs.get(f"{config.mode}_column_df")
 
@@ -2440,6 +2484,8 @@ def print_ddl_summary(results, config):
         results (dict): Results dictionary from apply_ddl_to_tables
         config (MetadataConfig): Configuration object
     """
+    config.i += 1
+    print(config.i, "print_ddl_summary")
     print("\n" + "=" * 80)
     print("DDL APPLICATION SUMMARY")
     print("=" * 80)
@@ -2627,6 +2673,8 @@ def get_protected_classification_for_table(table_classification: str) -> str:
 
 def summarize_table_content(table_df, config, table_name):
     """Create a new completion class for this."""
+    config.i += 1
+    print(config.i, "summarize_table_content")
     if table_df.count() > 1:
         summarizer = TableCommentSummarizer(config, table_df)
         summary = summarizer.summarize_comments(table_name)
@@ -3269,7 +3317,7 @@ def sanitize_string_list(string_list: List[str]):
     return sanitized_list
 
 
-def split_fully_scoped_table_name(df: DataFrame, full_table_name_col: str) -> DataFrame:
+def split_fully_scoped_table_name(config, df: DataFrame, full_table_name_col: str) -> DataFrame:
     """
     Splits a fully scoped table name column into catalog, schema, and table columns.
 
@@ -3280,6 +3328,8 @@ def split_fully_scoped_table_name(df: DataFrame, full_table_name_col: str) -> Da
     Returns:
         DataFrame: The updated DataFrame with catalog, schema, and table columns added.
     """
+    config.i += 1
+    print(config.i, "split_fully_scoped_table_name")
     split_col = split(col(full_table_name_col), r"\.")
     df = (
         df.withColumn("catalog", split_col.getItem(0).cast("string"))
