@@ -106,6 +106,8 @@ class SummaryCommentResponse(Response):
 
 class MetadataGenerator(ABC):
     def from_context(self, config):
+        config.i += 1
+        print(config.i, "MetadataGenerator.from_context")
         self.config = config
         self.chat_client = ChatClientFactory.create_client(config)
 
@@ -387,11 +389,17 @@ class PIIdentifier(MetadataGenerator):
 class MetadataGeneratorFactory:
     @staticmethod
     def create_generator(config) -> MetadataGenerator:
+        config.i += 1
+        print(config.i, "MetadataGeneratorFactory.create_generator")
         if config.mode == "comment":
+            config.i += 1
+            print(config.i, "MetadataGeneratorFactory config mode comment")
             generator = CommentGenerator()
             generator.from_context(config)
             return generator
         elif config.mode == "pi":
+            config.i += 1
+            print(config.i, "MetadataGeneratorFactory config mode pi")
             generator = PIIdentifier()
             generator.from_context(config)
             return generator

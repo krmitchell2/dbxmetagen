@@ -37,6 +37,7 @@ def luhn_checksum(card_number):
 
 def get_analyzer_engine(add_pci: bool = True, add_phi: bool = True) -> AnalyzerEngine:
     """Initialize Presidio AnalyzerEngine with PCI/PHI recognizers."""
+    print("get analyzer engine")
     analyzer = AnalyzerEngine()
 
     if add_pci:
@@ -123,6 +124,7 @@ def get_analyzer_engine(add_pci: bool = True, add_phi: bool = True) -> AnalyzerE
 
 
 def analyze_column(
+    config,
     analyzer: AnalyzerEngine,
     column_data: List[Any],
     entities: Optional[List[str]] = None,
@@ -133,6 +135,8 @@ def analyze_column(
     Analyze each cell in a column for PII/PHI/PCI entities.
     Only returns results above the score threshold to reduce false positives.
     """
+    config.i += 1
+    print(config.i, "analyze_column")
     results = []
     for i, cell in enumerate(column_data):
         try:
@@ -151,6 +155,7 @@ def analyze_column(
 
 
 def classify_column(
+    config,
     analyzer: AnalyzerEngine,
     column_name: str,
     column_data: List[Any],
@@ -161,6 +166,8 @@ def classify_column(
     Returns the detected type and a list of detected entities.
     Filters out overly aggressive entities and applies score thresholds.
     """
+    config.i += 1
+    print(config.i, "classify_column")
     entity_map = {
         "PII": [
             "PERSON",
@@ -276,6 +283,8 @@ def process_table(
                         Higher values reduce false positives but may miss some PII.
                         Recommended: 0.5 for balanced, 0.6-0.7 for stricter filtering.
     """
+    config.i += 1
+    print(config.i, "process_table")
     current_date = datetime.now().strftime("%Y%m%d")
     current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     output_dir = f"/Volumes/{config.catalog_name}/{config.schema_name}/{config.volume_name}/generated_metadata/{sanitize_user_identifier(config.current_user)}/{current_date}/presidio_logs"
@@ -296,7 +305,7 @@ def process_table(
     for idx, col in enumerate(columns):
         column_data = [row[idx] for row in data_rows]
         col_type, entities = classify_column(
-            analyzer, col, column_data, score_threshold=score_threshold
+            config, analyzer, col, column_data, score_threshold=score_threshold
         )
         results.append(
             {"column": col, "classification": col_type, "entities": entities}
@@ -341,6 +350,8 @@ def detect_pi(config, input_data: Dict[str, Any]) -> str:
     Main function to process input data for PII/PHI/PCI detection.
     Uses presidio_score_threshold from config (default 0.6) to filter results.
     """
+    config.i += 1
+    print(config.i, "detect_pi")
     # Get score threshold from config, default to 0.6 if not set
     score_threshold = getattr(config, "presidio_score_threshold", 0.6)
 

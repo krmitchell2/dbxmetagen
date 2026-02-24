@@ -31,6 +31,8 @@ class Prompt(ABC):
             df (DataFrame): Spark DataFrame.
             full_table_name (str): Full table name in the format 'catalog.schema.table'.
         """
+        config.i += 1
+        print(config.i, "Prompt __init__")
         self.spark = SparkSession.builder.getOrCreate()
         self.config = config
         self.df = df
@@ -578,13 +580,15 @@ class PIPrompt(Prompt):
             "column_contents": truncated_pandas_df.to_dict(orient="split"),
         }
 
-    def create_prompt_template(self) -> Dict[str, Any]:
+    def create_prompt_template(self, config) -> Dict[str, Any]:
         """
         Create a prompt template for generating metadata for tables and columns in Databricks.
 
         Returns:
             Dict[str, Any]: Dictionary containing the prompt template.
         """
+        config.i += 1
+        print(config.i, "PIPromt.create_prompt_template")
         logger.debug("Creating PI prompt template...")
         content = self.prompt_content
         if self.config.include_deterministic_pi:
@@ -820,6 +824,8 @@ class PromptFactory:
         Returns:
             Prompt: A prompt object.
         """
+        config.i += 1
+        print(config.i, "create_prompt")
         if config.mode == "comment" and config.allow_data_in_comments:
             return CommentPrompt(config, df, full_table_name)
         if config.mode == "comment":

@@ -411,6 +411,8 @@ class ChatClientFactory:
     @staticmethod
     def create_client(config) -> ChatClient:
         """Create a chat client based on the configuration."""
+        config.i += 1
+        print(config.i, "ChatClientFactory.create_client")
         chat_type = getattr(config, "chat_completion_type", "databricks")
 
         if chat_type == "databricks":

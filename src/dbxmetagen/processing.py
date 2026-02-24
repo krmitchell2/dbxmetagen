@@ -219,7 +219,7 @@ def get_extended_metadata_for_column(config, table_name, column_name):
     return spark.sql(query)
 
 
-def get_column_types_from_describe(spark: SparkSession, full_table_name: str) -> dict:
+def get_column_types_from_describe(config, spark: SparkSession, full_table_name: str) -> dict:
     """
     Get column names and types using DESCRIBE TABLE.
     This works even when df.schema fails (e.g., VARIANT type in Spark Connect).
@@ -227,6 +227,8 @@ def get_column_types_from_describe(spark: SparkSession, full_table_name: str) ->
     Returns:
         dict: {column_name: data_type_string}
     """
+    config.i += 1
+    print(config.i, "get_column_types_from_describe")
     describe_df = spark.sql(f"DESCRIBE TABLE {full_table_name}")
     columns = {}
     for row in describe_df.collect():
@@ -239,7 +241,7 @@ def get_column_types_from_describe(spark: SparkSession, full_table_name: str) ->
     return columns
 
 
-def read_table_with_type_conversion(
+def read_table_with_type_conversion(config,
     spark: SparkSession, full_table_name: str
 ) -> DataFrame:
     """
@@ -253,8 +255,11 @@ def read_table_with_type_conversion(
     Returns:
         DataFrame with BINARY/VARIANT columns converted to strings
     """
+    config.i += 1
+    print(config.i, "read_table_with_type_conversion")
     # Get column types using DESCRIBE (works even with VARIANT)
-    column_types = get_column_types_from_describe(spark, full_table_name)
+    # blarg 4
+    column_types = get_column_types_from_describe(config, spark, full_table_name)
 
     # Build SELECT expressions with type conversions
     select_exprs = []
@@ -345,7 +350,7 @@ def convert_special_types_to_string(df: DataFrame) -> DataFrame:
     return df
 
 
-def sample_df(df: DataFrame, nrows: int, sample_size: int = 5) -> DataFrame:
+def sample_df(config, df: DataFrame, nrows: int, sample_size: int = 5) -> DataFrame:
     """
     Sample dataframe to a given size and filter out rows with lots of nulls.
 
@@ -360,11 +365,13 @@ def sample_df(df: DataFrame, nrows: int, sample_size: int = 5) -> DataFrame:
     Returns:
         DataFrame: A DataFrame with columns to generate metadata for.
     """
+    config.i += 1
+    print(config.i, "sample_df")
     if nrows < sample_size:
         return df.limit(sample_size)
 
     larger_sample = sample_size * 100
-    sampling_ratio = determine_sampling_ratio(nrows, larger_sample)
+    sampling_ratio = determine_sampling_ratio(config, nrows, larger_sample)
     sampled_df = df.sample(withReplacement=False, fraction=sampling_ratio)
     null_counts_per_row = sampled_df.withColumn(
         "null_count",
@@ -1853,7 +1860,7 @@ def get_domain_classification(
     domain_config = load_domain_config(config.domain_config_path)
 
     # Use SQL-based reading with type conversion to handle VARIANT in Spark Connect
-    df = read_table_with_type_conversion(spark, full_table_name)
+    df = read_table_with_type_conversion(config,spark, full_table_name)
     total_columns = len(df.columns)
 
     # Limit columns for domain classification to avoid massive prompts
@@ -1867,10 +1874,10 @@ def get_domain_classification(
     )
 
     # Sample rows from the limited column set
-    sampled_df = sample_df(first_chunk_df, first_chunk_df.count(), config.sample_size)
+    sampled_df = sample_df(config, first_chunk_df, first_chunk_df.count(), config.sample_size)
 
     prompt = PromptFactory.create_prompt(config, sampled_df, full_table_name)
-    prompt_messages = prompt.create_prompt_template()
+    prompt_messages = prompt.create_prompt_template(config)
 
     # Check prompt length to avoid excessive token usage
     check_token_length_against_num_words(prompt_messages, config)
@@ -1932,6 +1939,8 @@ def get_generated_metadata(
     Returns:
         List[Dict[str, Any]]: A list of dictionaries containing the generated metadata.
     """
+    config.i += 1
+    print(config.i, "get_generated_metadata")
     spark = SparkSession.builder.getOrCreate()
 
     if int(config.sample_size) == 0:
@@ -1957,15 +1966,20 @@ def get_generated_metadata_data_aware(
     Returns:
         List[Tuple[PIResponse, CommentResponse]]: A list of tuples containing the generated metadata.
     """
+    config.i += 1
+    print(config.i, "get_generated_metadata_data_aware")
     # Use SQL-based reading with type conversion to handle VARIANT in Spark Connect
-    df = read_table_with_type_conversion(spark, full_table_name)
+    df = read_table_with_type_conversion(config,spark, full_table_name)
     responses = []
     nrows = df.count()
     chunked_dfs = chunk_df(df, config.columns_per_call)
     for i, chunk in enumerate(chunked_dfs):
-        sampled_chunk = sample_df(chunk, nrows, config.sample_size)
+        sampled_chunk = sample_df(config, chunk, nrows, config.sample_size)
+        # blarg 6
+        config.i += 1
+        print(config.i, "creating prompt")
         prompt = PromptFactory.create_prompt(config, sampled_chunk, full_table_name)
-        prompt_messages = prompt.create_prompt_template()
+        prompt_messages = prompt.create_prompt_template(config)
         check_token_length_against_num_words(prompt_messages, config)
         if config.registered_model_name != "default":
             chat_response = call_registered_model(config)
@@ -1985,6 +1999,8 @@ def check_token_length_against_num_words(prompt: str, config: MetadataConfig):
     """
     This function is not intended to catch every instance of overflowing token length, but to avoid significant overflow. Specifically, we compare the number of words in the prompt to the maximum number of tokens allowed in the model. If the number of words exceeds the maximum, an error is raised. This is potentially quite a conservative metric.
     """
+    config.i += 1
+    print(config.i, "check_token_length_against_num_words")
     num_words = len(str(prompt).split())
     if num_words > config.max_prompt_length:
         raise ValueError(
@@ -2038,6 +2054,8 @@ def review_and_generate_metadata(
         return rows_to_df(column_rows, config), rows_to_df(table_rows, config)
 
     # Standard flow for comment and pi modes
+    config.i += 1
+    print(config.i, "starting Standard flow for comment and pi modes....")
     # blarg 3
     responses = get_generated_metadata(config, full_table_name)
     for response in responses:
