@@ -90,9 +90,13 @@ def initialize_infrastructure(config):
     config.i += 1
     print(config.i, "setup_queue")
     config.table_names = setup_queue(config)
+    # blarg
     if config.control_table:
+        config.i += 1
+        print(config.i, "upsert table names to control table")
         upsert_table_names_to_control_table(config.table_names, config)
-    print("Running generate on...", config.table_names)
+    config.i += 1
+    print(config.i,"Running generate on...", config.table_names)
 
 
 def _grant_permissions_to_groups(config, catalog_name, schema_name, volume_name):
@@ -361,6 +365,8 @@ def main(kwargs):
         config.i += 1
         print(config.i, "initialize infrastructuree")
         initialize_infrastructure(config)
+        config.i += 1
+        print(config.i, "infrastructuree has been initialized")
 
         # # Generate metadata
         # generate_and_persist_metadata(config)

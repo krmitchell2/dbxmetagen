@@ -2688,7 +2688,7 @@ def instantiate_metadata_objects(
     return METADATA_PARAMS
 
 
-def trim_whitespace_from_df(df: DataFrame) -> DataFrame:
+def trim_whitespace_from_df(config, df: DataFrame) -> DataFrame:
     """
     Trims whitespace from all string columns in the DataFrame.
 
@@ -2698,6 +2698,8 @@ def trim_whitespace_from_df(df: DataFrame) -> DataFrame:
     Returns:
         DataFrame: The DataFrame with trimmed string columns.
     """
+    config.i += 1
+    print(config.i, "trim_whitespace_from_df")
     string_columns = [
         field.name
         for field in df.schema.fields
@@ -2887,11 +2889,13 @@ def setup_queue(config: MetadataConfig) -> List[str]:
     config_table_names = expand_schema_wildcards(config, config_table_names)
     config.i += 1
     print(config.i, "load tables names from csv")
-    # blarg here
     file_table_names = load_table_names_from_csv(config.source_file_path)
     
+
     # If include_previously_failed_tables is enabled, also include failed/abandoned tables
     if spark.catalog.tableExists(control_table) and getattr(config, 'include_previously_failed_tables', False):
+        config.i += 1
+        print(config.i, "include previously failed tables")
         timeout_minutes = getattr(config, 'claim_timeout_minutes', 60)
         run_id = config.run_id
         
@@ -2921,16 +2925,18 @@ def setup_queue(config: MetadataConfig) -> List[str]:
                 f"Large dataset detected ({retry_df.count()} rows). Skipping retry table inclusion."
             )
     
+    config.i += 1
+    print(config.i, "combined_table_names")
     combined_table_names = list(
         set().union(queued_table_names, config_table_names, file_table_names)
     )
     combined_table_names = ensure_fully_scoped_table_names(
-        combined_table_names, config.catalog_name
+        config, combined_table_names, config.catalog_name
     )
     return combined_table_names
 
 
-def ensure_fully_scoped_table_names(
+def ensure_fully_scoped_table_names(config,
     table_names: List[str], default_catalog: str
 ) -> List[str]:
     """
@@ -2943,6 +2949,8 @@ def ensure_fully_scoped_table_names(
     Returns:
         List[str]: A list of fully scoped table names.
     """
+    config.i += 1
+    print(config.i, "ensure_fully_scoped_table_names")
     fully_scoped_table_names = []
     for table_name in table_names:
         parts = table_name.split(".")
@@ -2968,31 +2976,44 @@ def upsert_table_names_to_control_table(
     """
     import time
     import random
-    
-    print(f"Upserting table names to control table {table_names}...")
+    config.i += 1
+    print(config.i, "inside upsert table names to control table")
+    config.i += 1
+    print(config.i, f"Upserting table names to control table {table_names}...")
     spark = SparkSession.builder.getOrCreate()
+    config.i += 1
+    print(config.i, "get_control_table")
     formatted_control_table = get_control_table(config)
     control_table = (
         f"{config.catalog_name}.{config.schema_name}.{formatted_control_table}"
     )
-    table_names = ensure_fully_scoped_table_names(table_names, config.catalog_name)
+    config.i += 1
+    print(config.i, "calling ensure fully scoped table names")
+    table_names = ensure_fully_scoped_table_names(config, table_names, config.catalog_name)
     
     if not table_names:
         print("No table names to upsert.")
         return
-    
+    config.i += 1
+    print(config.i, "creat\ing table names df")
     table_names_df = spark.createDataFrame(
         [(name,) for name in table_names], ["table_name"]
     )
-    table_names_df = trim_whitespace_from_df(table_names_df)
+    table_names_df = trim_whitespace_from_df(config, table_names_df)
     
     # Create a unique temp view name to avoid conflicts between concurrent tasks
     # Sanitize task_id for use as view name (remove @, ., - and other special chars)
+    config.i += 1
+    print(config.i, "Create a unique temp view name to avoid conflicts between concurrent tasks")
     sanitized_task_id = re.sub(r'[^a-zA-Z0-9_]', '_', config.task_id or 'default')
     temp_view_name = f"new_table_names_{sanitized_task_id}"
+    config.i += 1
+    print(config.i, "creating temp view ", temp_view_name)
     table_names_df.createOrReplaceTempView(temp_view_name)
     
     # Escape string values for SQL
+    config.i += 1
+    print(config.i, "escape string values for sql")
     job_id = config.job_id.replace("'", "''") if config.job_id else ""
     run_id = str(config.run_id).replace("'", "''") if config.run_id else ""
     
@@ -3011,11 +3032,17 @@ def upsert_table_names_to_control_table(
     
     # Retry loop for handling concurrent conflicts
     for attempt in range(max_retries):
+        config.i += 1
+        print(config.i, "Retry loop for handling concurrent conflicts")
         try:
+            config.i += 1
+            print(config.i, "merging")
             spark.sql(merge_sql)
             print(f"Successfully merged table names into control table {control_table}")
             return
         except Exception as e:
+            config.i += 1
+            print(config.i, "error upsert_table_names_to_control_table")
             error_str = str(e)
             if "ConcurrentAppendException" in error_str or "DELTA_CONCURRENT" in error_str:
                 if attempt < max_retries - 1:
