@@ -931,9 +931,14 @@ def get_control_table(config: MetadataConfig) -> str:
     Returns:
         str: The control table name.
     """
-    return config.control_table.format(
+    config.i +=1 
+    print(config.i,"get_control_table")
+    formatted = config.control_table.format(
         sanitize_user_identifier(get_current_user())
     )
+    config.i +=1 
+    print(config.i,"formatted", formatted)
+    return formatted
 
 
 def mark_as_deleted(table_name: str, config: MetadataConfig) -> None:
@@ -2639,10 +2644,16 @@ def create_tables(config: MetadataConfig) -> None:
             - dest_schema (str): The destination schema name.
             - control_table (str): The destination table used for tracking table queue.
     """
+    config.i += 1
+    print(config.i, "get spark sesh")
     spark = SparkSession.builder.getOrCreate()
     if config.control_table:
+        config.i += 1
+        print(config.i, "control table")
         formatted_control_table = get_control_table(config)
         logger.info("Formatted control table...", formatted_control_table)
+        config.i += 1
+        print(config.i, "create control table")
         spark.sql(
             f"""CREATE TABLE IF NOT EXISTS {config.catalog_name}.{config.schema_name}.{formatted_control_table} (
                 table_name STRING,
@@ -2850,7 +2861,11 @@ def setup_queue(config: MetadataConfig) -> List[str]:
     Returns:
         List[str]: A list of table names.
     """
+    config.i += 1
+    print(config.i, "in setup_queue")
     spark = SparkSession.builder.getOrCreate()
+    config.i += 1
+    print(config.i, "get control table")
     formatted_control_table = get_control_table(config)
     control_table = (
         f"{config.catalog_name}.{config.schema_name}.{formatted_control_table}"
@@ -2858,11 +2873,17 @@ def setup_queue(config: MetadataConfig) -> List[str]:
     queued_table_names = set()
     
     # Get tables from current session (config and CSV)
+    config.i += 1
+    print(config.i, "get table names from current sesh")
     config_table_string = config.table_names
     config_table_names = [
         name.strip() for name in config_table_string.split(",") if len(name.strip()) > 0
     ]
+    print("config_table_names ", config_table_names)
     # Expand schema wildcards in config table names as well
+    config.i += 1
+    print(config.i, "expand_schema_wildcards")
+    # blarg here
     config_table_names = expand_schema_wildcards(config_table_names)
     file_table_names = load_table_names_from_csv(config.source_file_path)
     

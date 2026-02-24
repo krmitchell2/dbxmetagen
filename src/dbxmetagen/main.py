@@ -82,8 +82,13 @@ def initialize_infrastructure(config):
     config.i += 1
     print(config.i, "setup ddl")
     setup_ddl(config)
-    # HERE blarg
+    config.i += 1
+    print(config.i, "create tables")
     create_tables(config)
+    config.i += 1
+    print(config.i, "tables created")
+    config.i += 1
+    print(config.i, "setup_queue")
     config.table_names = setup_queue(config)
     if config.control_table:
         upsert_table_names_to_control_table(config.table_names, config)
