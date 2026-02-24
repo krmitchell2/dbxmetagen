@@ -1978,7 +1978,6 @@ def get_generated_metadata_data_aware(
         config.i += 1
         print(config.i, "creating prompt")
         prompt = PromptFactory.create_prompt(config, sampled_chunk, full_table_name)
-        # blarg 6
 
         prompt_messages = prompt.create_prompt_template(config)
         check_token_length_against_num_words(prompt_messages, config)
@@ -2059,6 +2058,7 @@ def review_and_generate_metadata(
     print(config.i, "starting Standard flow for comment and pi modes....")
     # blarg 3
     responses = get_generated_metadata(config, full_table_name)
+    print("blarg back here?")
     for response in responses:
         tokenized_full_table_name = replace_catalog_name(config, full_table_name)
         if config.mode == "comment":

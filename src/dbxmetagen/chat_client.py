@@ -419,6 +419,7 @@ class ChatClientFactory:
             return DatabricksClient()
 
         elif chat_type == "openai_spec":
+            print("TODO openai spec")
             if not config.custom_endpoint_url:
                 raise ValueError("custom_endpoint_url is required for openai_spec type")
 
@@ -428,6 +429,8 @@ class ChatClientFactory:
             return OpenAISpecClient(config.custom_endpoint_url, api_key)
 
         elif chat_type == "custom_chat_spec":
+            print("TODO custom chat spec")
+
             if not config.custom_endpoint_url:
                 raise ValueError(
                     "custom_endpoint_url is required for custom_chat_spec type"
