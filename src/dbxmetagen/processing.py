@@ -950,6 +950,8 @@ def mark_as_deleted(table_name: str, config: MetadataConfig) -> None:
         table_name (str): The name of the table to update.
         config (MetadataConfig): Configuration object containing setup and model parameters.
     """
+    config.i += 1
+    print(config.i, "mark_as_deleted")
     spark = SparkSession.builder.getOrCreate()
     formatted_control_table = get_control_table(config)
     control_table = (
@@ -992,6 +994,8 @@ def claim_table(table_name: str, config: MetadataConfig, max_retries: int = 3) -
     import time
     import random
     
+    config.i += 1
+    print(config.i, "claim_table")
     spark = SparkSession.builder.getOrCreate()
     formatted_control_table = get_control_table(config)
     control_table = (
@@ -1034,6 +1038,8 @@ def claim_table(table_name: str, config: MetadataConfig, max_retries: int = 3) -
     
     for attempt in range(max_retries):
         try:
+            config.i += 1
+            print(config.i, "try to claim table")
             spark.sql(claim_query)
             
             # Verify claim ownership
@@ -2004,10 +2010,23 @@ def review_and_generate_metadata(
     Returns:
         Tuple[DataFrame, DataFrame]: DataFrames containing the generated metadata.
     """
+    config.i += 1
+    print(config.i, "review_and_generate_metadata")
     table_rows = []
     column_rows = []
 
     if config.mode == "domain":
+        config.i += 1
+        print(config.i, "config mode domain")
+        print("")
+        print("")
+        print("")
+        print("")
+        print("ADD MARKERS")
+        print("")
+        print("")
+        print("")
+        print("")
         domain_result = get_domain_classification(config, full_table_name)
         tokenized_full_table_name = replace_catalog_name(config, full_table_name)
         table_rows = append_domain_table_row(
@@ -2019,6 +2038,7 @@ def review_and_generate_metadata(
         return rows_to_df(column_rows, config), rows_to_df(table_rows, config)
 
     # Standard flow for comment and pi modes
+    # blarg 3
     responses = get_generated_metadata(config, full_table_name)
     for response in responses:
         tokenized_full_table_name = replace_catalog_name(config, full_table_name)
@@ -2193,6 +2213,8 @@ def process_and_add_ddl(config: MetadataConfig, table_name: str) -> DataFrame:
     Returns:
         DataFrame: The unioned DataFrame with DDL statements added.
     """
+    config.i += 1
+    print(config.i, "process_and_add_ddl")
     column_df, table_df = review_and_generate_metadata(config, table_name)
     column_df = split_and_hardcode_df(column_df, config)
     table_df = split_and_hardcode_df(table_df, config)
@@ -2613,7 +2635,9 @@ def setup_ddl(config: MetadataConfig) -> None:
             - volume_name (str): The volume name.
     """
     config.i += 1
-    print(config.i,"get or crete spark sesh")
+    print(config.i,"setup_ddl")
+    config.i += 1
+    print(config.i,"Creates a schema volume if it does not already exist.")
     spark = SparkSession.builder.getOrCreate()
     ### Add error handling here
     config.i += 1
@@ -2645,11 +2669,11 @@ def create_tables(config: MetadataConfig) -> None:
             - control_table (str): The destination table used for tracking table queue.
     """
     config.i += 1
-    print(config.i, "get spark sesh")
+    print(config.i, "create_tables")
     spark = SparkSession.builder.getOrCreate()
     if config.control_table:
         config.i += 1
-        print(config.i, "control table")
+        print(config.i, "creating control table")
         formatted_control_table = get_control_table(config)
         logger.info("Formatted control table...", formatted_control_table)
         config.i += 1
@@ -2724,24 +2748,35 @@ def generate_and_persist_metadata(config: Any) -> None:
     Args:
         config: Configuration object containing setup and model parameters.
     """
+    config.i += 1
+    print(config.i, "generate_and_persist_metadata")
     spark = SparkSession.builder.getOrCreate()
     logger = logging.getLogger("metadata_processing")
     logger.setLevel(logging.INFO)
     
     skipped_tables = []
-
+    config.i += 1
+    print(config.i, "for table in config.table_names")
     for table in config.table_names:
+        config.i += 1
+        print(config.i, "table")
         log_dict = {}
         try:
             logger.info(f"[generate_and_persist_metadata] Processing table {table}...")
             
             # Attempt to claim table for concurrent task safety
+            config.i += 1
+            print(config.i, "Attempt to claim table for concurrent task safety")
+            # if the table is claimed, skip it
             if config.control_table and not claim_table(table, config):
                 logger.info(f"[generate_and_persist_metadata] Skipping {table} - claimed by another task")
                 skipped_tables.append(table)
                 continue
-
+            
+            # if the table doesnt exist, delete it from the control table
             if not spark.catalog.tableExists(table):
+                config.i += 1
+                print(config.i, "control table doesnt exist, deleting...")
                 msg = f"Table {table} does not exist. Deleting from control table and skipping..."
                 logger.warning(f"[generate_and_persist_metadata] {msg}")
                 mark_as_deleted(table, config)
@@ -2754,6 +2789,10 @@ def generate_and_persist_metadata(config: Any) -> None:
                     "_updated_at": str(datetime.now()),
                 }
             else:
+                config.i += 1
+                print(config.i, "control table exists, continuing...")
+                # blarg 2
+
                 df = process_and_add_ddl(config, table)
                 logger.info(
                     f"[generate_and_persist_metadata] Generating and persisting ddl for {table}..."
@@ -2864,7 +2903,7 @@ def setup_queue(config: MetadataConfig) -> List[str]:
         List[str]: A list of table names.
     """
     config.i += 1
-    print(config.i, "in setup_queue")
+    print(config.i, "setup_queue")
     spark = SparkSession.builder.getOrCreate()
     config.i += 1
     print(config.i, "get control table")
@@ -2883,8 +2922,8 @@ def setup_queue(config: MetadataConfig) -> List[str]:
     ]
     print("config_table_names ", config_table_names)
     # Expand schema wildcards in config table names as well
-    config.i += 1
-    print(config.i, "expand_schema_wildcards")
+    # config.i += 1
+    # print(config.i, "expand_schema_wildcards")
     
     config_table_names = expand_schema_wildcards(config, config_table_names)
     config.i += 1
@@ -3097,7 +3136,7 @@ def is_schema_wildcard(config, table_name: str) -> bool:
         bool: True if the table name is a schema wildcard pattern.
     """
     config.i += 1
-    print(config.i, "inside is_schema_wildcard")
+    print(config.i, "is_schema_wildcard")
     result = table_name.strip().endswith(".*") and table_name.count(".") == 2
     config.i += 1
     print(config.i, "result", result)
@@ -3116,7 +3155,7 @@ def get_tables_in_schema(config, catalog_name: str, schema_name: str) -> List[st
         List[str]: A list of fully qualified table names.
     """
     config.i += 1
-    print(config.i, "inside get_tables_in_schema")
+    print(config.i, "get_tables_in_schema")
     spark = SparkSession.builder.getOrCreate()
 
     try:
@@ -3161,7 +3200,7 @@ def expand_schema_wildcards(config, table_names: List[str]) -> List[str]:
         List[str]: Expanded list of table names with wildcards resolved.
     """
     config.i += 1
-    print(config.i, "in expand_schema_wildcards")
+    print(config.i, "expand_schema_wildcards")
     expanded_names = []
 
     for table_name in table_names:

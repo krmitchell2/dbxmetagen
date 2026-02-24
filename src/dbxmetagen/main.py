@@ -80,6 +80,8 @@ def setup_environment(config):
 def initialize_infrastructure(config):
     """Initialize DDL directories, tables, and queue."""
     config.i += 1
+    print(config.i, "initialize_infrastructure")
+    config.i += 1
     print(config.i, "setup ddl")
     setup_ddl(config)
     config.i += 1
@@ -90,7 +92,6 @@ def initialize_infrastructure(config):
     config.i += 1
     print(config.i, "setup_queue")
     config.table_names = setup_queue(config)
-    # blarg
     if config.control_table:
         config.i += 1
         print(config.i, "upsert table names to control table")
@@ -360,7 +361,7 @@ def main(kwargs):
     try:
         # Setup environment and infrastructure
         config.i += 1
-        print(config.i,"setup environment")
+        print(config.i,"setup databricks environment variables")
         setup_environment(config)
         config.i += 1
         print(config.i, "initialize infrastructuree")
@@ -368,8 +369,11 @@ def main(kwargs):
         config.i += 1
         print(config.i, "infrastructuree has been initialized")
 
-        # # Generate metadata
-        # generate_and_persist_metadata(config)
+        # Generate metadata
+        # blarg
+        config.i += 1
+        print(config.i, "generate metadata")
+        generate_and_persist_metadata(config)
 
         # # Grant permissions on created objects
         # grant_permissions_on_created_objects(config)
