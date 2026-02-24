@@ -1,4 +1,4 @@
-# """Configuration class for dbxmetagen."""
+"""Configuration class for dbxmetagen."""
 
 # import uuid
 # from datetime import datetime
@@ -35,8 +35,8 @@
 #     )
 
 
-# class MetadataConfig:
-#     """Configuration class for dbxmetagen."""
+class MetadataConfig:
+    """Configuration class for dbxmetagen."""
 
 #     ACRO_CONTENT = {}
 #     SETUP_PARAMS = {
