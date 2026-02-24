@@ -18,6 +18,7 @@ from src.dbxmetagen.databricks_utils import (
     grant_user_permissions,
     grant_group_permissions,
 )
+import pprint
 
 
 def get_dbr_version():
@@ -266,13 +267,24 @@ def cleanup_resources(config, spark):
 
 def main(kwargs):
     """Main function to generate metadata."""
+    i = 0
     # Initialize Spark and get runtime info
+    i += 1
+    print(i, " Initialize Spark and get runtime info")
     spark = SparkSession.builder.getOrCreate()
+    # get databricks version
+    i += 1
+    print(i," get databricks version")
     dbr_version = get_dbr_version()
 
     # Validate required parameters early
     catalog_name = kwargs.get("catalog_name", "")
+    i += 1
+    print(i, " validate params catalog name", catalog_name)
     table_names = kwargs.get("table_names", "")
+    i += 1
+    print(i,"validate params table names", table_names)
+
 
     if not catalog_name or str(catalog_name).lower() in ["none", "null", ""]:
         raise ValueError(
@@ -300,7 +312,10 @@ def main(kwargs):
         )
 
     # Initialize configuration and benchmarking
+    i += 1
+    print(i,"create config object")
     config = MetadataConfig(**kwargs)
+    pprint.pprint(config)
     experiment_name = setup_benchmarking(config)
 
     # Validate override CSV (only if manual overrides are enabled)
@@ -319,28 +334,36 @@ def main(kwargs):
                 )
 
     # Validate runtime compatibility
+    i += 1
+    print(i,"validate runtime compatibility")
     validate_runtime_compatibility(dbr_version, config)
 
     # Setup mode-specific dependencies
+    i += 1
+    print(i,"setup mode specific dependencies")
     setup_mode_dependencies(config)
 
     # Use try/finally to ensure cleanup runs even on errors
     # The finally block ensures temp tables are cleaned up, but exceptions still propagate
     try:
         # Setup environment and infrastructure
+        i += 1
+        print(i,"setup environment")
         setup_environment(config)
-        initialize_infrastructure(config)
+        # initialize_infrastructure(config)
 
-        # Generate metadata
-        generate_and_persist_metadata(config)
+        # # Generate metadata
+        # generate_and_persist_metadata(config)
 
-        # Grant permissions on created objects
-        grant_permissions_on_created_objects(config)
+        # # Grant permissions on created objects
+        # grant_permissions_on_created_objects(config)
 
-        # Log token usage if benchmarking is enabled
-        if experiment_name:
-            log_token_usage(config, experiment_name)
+        # # Log token usage if benchmarking is enabled
+        # if experiment_name:
+        #     log_token_usage(config, experiment_name)
     finally:
         # Always cleanup resources, even if there were errors above
         # cleanup_resources has internal error handling to prevent masking original exceptions
         cleanup_resources(config, spark)
+    # cleanup_resources(config, spark)
+
