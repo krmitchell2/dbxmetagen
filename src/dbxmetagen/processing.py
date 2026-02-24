@@ -3140,7 +3140,7 @@ def expand_schema_wildcards(config, table_names: List[str]) -> List[str]:
     for table_name in table_names:
         config.i += 1
         print(config.i, "table_name", table_name)
-        if is_schema_wildcard(table_name):
+        if is_schema_wildcard(config, table_name):
             # Extract catalog and schema from the wildcard pattern
             parts = table_name.replace(".*", "").split(".")
             if len(parts) == 2:
