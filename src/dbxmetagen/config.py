@@ -117,6 +117,7 @@ class MetadataConfig:
     MODEL_PARAMS = {}
 
     def __init__(self, **kwargs):
+        self.i = 0
         self.setup_params = self.__class__.SETUP_PARAMS
         self.model_params = self.__class__.MODEL_PARAMS
         self.log_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

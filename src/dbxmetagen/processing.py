@@ -2607,8 +2607,12 @@ def setup_ddl(config: MetadataConfig) -> None:
             - dest_schema (str): The destination schema name.
             - volume_name (str): The volume name.
     """
+    config.i += 1
+    print(config.i,"get or crete spark sesh")
     spark = SparkSession.builder.getOrCreate()
     ### Add error handling here
+    config.i += 1
+    print(config.i, "create schema")
     if config.schema_name:
         spark.sql(
             f"CREATE SCHEMA IF NOT EXISTS {config.catalog_name}.{config.schema_name};"
@@ -2616,8 +2620,12 @@ def setup_ddl(config: MetadataConfig) -> None:
     volume_sql = f"CREATE VOLUME IF NOT EXISTS {config.catalog_name}.{config.schema_name}.{config.volume_name};"
 
     if config.volume_name:
+        config.i += 1
+        print(config.i, "create volume")
         spark.sql(volume_sql)
         review_output_path = f"/Volumes/{config.catalog_name}/{config.schema_name}/{config.volume_name}/{sanitize_user_identifier(config.current_user)}/reviewed_outputs/"
+        config.i += 1
+        print(config.i, "create directory")
         os.makedirs(review_output_path, exist_ok=True)
 
 

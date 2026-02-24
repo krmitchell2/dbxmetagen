@@ -79,7 +79,10 @@ def setup_environment(config):
 
 def initialize_infrastructure(config):
     """Initialize DDL directories, tables, and queue."""
+    config.i += 1
+    print(config.i, "setup ddl")
     setup_ddl(config)
+    # HERE blarg
     create_tables(config)
     config.table_names = setup_queue(config)
     if config.control_table:
@@ -269,21 +272,21 @@ def main(kwargs):
     """Main function to generate metadata."""
     i = 0
     # Initialize Spark and get runtime info
-    i += 1
-    print(i, " Initialize Spark and get runtime info")
+    config.i += 1
+    print(config.i, " Initialize Spark and get runtime info")
     spark = SparkSession.builder.getOrCreate()
     # get databricks version
-    i += 1
-    print(i," get databricks version")
+    config.i += 1
+    print(config.i," get databricks version")
     dbr_version = get_dbr_version()
 
     # Validate required parameters early
     catalog_name = kwargs.get("catalog_name", "")
-    i += 1
-    print(i, " validate params catalog name", catalog_name)
+    config.i += 1
+    print(config.i, " validate params catalog name", catalog_name)
     table_names = kwargs.get("table_names", "")
-    i += 1
-    print(i,"validate params table names", table_names)
+    config.i += 1
+    print(config.i,"validate params table names", table_names)
 
 
     if not catalog_name or str(catalog_name).lower() in ["none", "null", ""]:
@@ -312,8 +315,8 @@ def main(kwargs):
         )
 
     # Initialize configuration and benchmarking
-    i += 1
-    print(i,"create config object")
+    config.i += 1
+    print(config.i,"create config object")
     config = MetadataConfig(**kwargs)
     pprint.pprint(config)
     experiment_name = setup_benchmarking(config)
@@ -334,23 +337,25 @@ def main(kwargs):
                 )
 
     # Validate runtime compatibility
-    i += 1
-    print(i,"validate runtime compatibility")
+    config.i += 1
+    print(config.i,"validate runtime compatibility")
     validate_runtime_compatibility(dbr_version, config)
 
     # Setup mode-specific dependencies
-    i += 1
-    print(i,"setup mode specific dependencies")
+    config.i += 1
+    print(config.i,"setup mode specific dependencies")
     setup_mode_dependencies(config)
 
     # Use try/finally to ensure cleanup runs even on errors
     # The finally block ensures temp tables are cleaned up, but exceptions still propagate
     try:
         # Setup environment and infrastructure
-        i += 1
-        print(i,"setup environment")
+        config.i += 1
+        print(config.i,"setup environment")
         setup_environment(config)
-        # initialize_infrastructure(config)
+        config.i += 1
+        print(config.i, "initialize infrastructuree")
+        initialize_infrastructure(config)
 
         # # Generate metadata
         # generate_and_persist_metadata(config)
