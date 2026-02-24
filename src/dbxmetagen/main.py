@@ -270,23 +270,23 @@ def cleanup_resources(config, spark):
 
 def main(kwargs):
     """Main function to generate metadata."""
-    i = 0
+    # i = 0
     # Initialize Spark and get runtime info
-    config.i += 1
-    print(config.i, " Initialize Spark and get runtime info")
+    # config.i += 1
+    print(" Initialize Spark and get runtime info")
     spark = SparkSession.builder.getOrCreate()
     # get databricks version
-    config.i += 1
-    print(config.i," get databricks version")
+    # config.i += 1
+    print(" get databricks version")
     dbr_version = get_dbr_version()
 
     # Validate required parameters early
     catalog_name = kwargs.get("catalog_name", "")
-    config.i += 1
-    print(config.i, " validate params catalog name", catalog_name)
+    # config.i += 1
+    print( " validate params catalog name", catalog_name)
     table_names = kwargs.get("table_names", "")
-    config.i += 1
-    print(config.i,"validate params table names", table_names)
+    # config.i += 1
+    print("validate params table names", table_names)
 
 
     if not catalog_name or str(catalog_name).lower() in ["none", "null", ""]:
@@ -315,8 +315,8 @@ def main(kwargs):
         )
 
     # Initialize configuration and benchmarking
-    config.i += 1
-    print(config.i,"create config object")
+    # config.i += 1
+    print("create config object")
     config = MetadataConfig(**kwargs)
     pprint.pprint(config)
     experiment_name = setup_benchmarking(config)
