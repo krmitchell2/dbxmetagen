@@ -27,6 +27,10 @@
 
 # COMMAND ----------
 
+dbutils.library.restartPython()
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC # Library imports, widgets, and environment
 
@@ -35,8 +39,9 @@
 import sys
 
 sys.path.append("../")
-# from src.dbxmetagen.main import main
-from src.dbxmetagen.databricks_utils import setup_widgets
+from src.dbxmetagen.main import main
+from src.dbxmetagen.databricks_utils import setup_notebook_variables
+# 
 # from src.dbxmetagen.databricks_utils import (
 #     setup_widgets,
 #     setup_notebook_variables,
@@ -44,9 +49,9 @@ from src.dbxmetagen.databricks_utils import setup_widgets
 # from src.dbxmetagen.config import MetadataConfig
 # import pprint
 
-setup_widgets(dbutils)
+# setup_widgets(dbutils)
 notebook_variables = setup_notebook_variables(dbutils)
-pprint.pprint(notebook_variables)
+# pprint.pprint(notebook_variables)
 # create notebook variables
 
 # COMMAND ----------
