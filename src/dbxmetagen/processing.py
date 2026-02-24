@@ -812,7 +812,7 @@ class DataFrameToExcelError(Exception):
     """Custom exception for DataFrame to Excel export errors."""
 
 
-def ensure_directory_exists(directory_path: str) -> None:
+def ensure_directory_exists(config, directory_path: str) -> None:
     """
     Ensures that the specified directory exists, creating it if necessary.
 
@@ -822,6 +822,8 @@ def ensure_directory_exists(directory_path: str) -> None:
     Raises:
         DataFrameToExcelError: If directory creation fails.
     """
+    config.i += 1
+    print(config.i, "ensure_directory_exists")
     try:
         if not os.path.exists(directory_path):
             os.mkdir(directory_path)
@@ -831,7 +833,7 @@ def ensure_directory_exists(directory_path: str) -> None:
         raise DataFrameToExcelError(f"Directory creation failed: {e}")
 
 
-def df_column_to_excel_file(
+def df_column_to_excel_file(config,
     df: pd.DataFrame, filename: str, base_path: str, excel_column: str
 ) -> str:
     """
@@ -849,6 +851,8 @@ def df_column_to_excel_file(
     Raises:
         DataFrameToExcelError: If export fails.
     """
+    config.i += 1
+    print(config.i, "df_column_to_excel_file")
     logger.info("Starting export of DataFrame column to Excel.")
     try:
         if excel_column not in df.columns:
@@ -858,7 +862,7 @@ def df_column_to_excel_file(
             )
 
         output_dir = base_path
-        ensure_directory_exists(output_dir)
+        ensure_directory_exists(config,output_dir)
         excel_file_path = os.path.join(output_dir, f"{filename}.xlsx")
         local_path = f"/local_disk0/tmp/{filename}.xlsx"
         df[[excel_column]].to_excel(local_path, index=False, engine="openpyxl")
@@ -911,6 +915,8 @@ def populate_log_table(df, config, current_user, base_path):
     Returns:
         DataFrame: The result DataFrame.
     """
+    config.i += 1
+    print(config.i, "populate_log_table")
     # For serverless compatibility, ensure consistent data types without forcing string conversion
     # This maintains compatibility with existing table schemas
 
@@ -1148,6 +1154,8 @@ def mark_table_failed(table_name: str, config: MetadataConfig, error_message: st
 
 def run_log_table_ddl(config):
     """Run the unified log table DDL."""
+    config.i += 1
+    print(config.i, "run_log_table_ddl")
     spark = SparkSession.builder.getOrCreate()
     spark.sql(
         f"""CREATE TABLE IF NOT EXISTS {config.catalog_name}.{config.schema_name}.metadata_generation_log (
@@ -1200,6 +1208,8 @@ def _export_table_to_tsv(df, config):
     Returns:
         str: Table name if operation was successful, False otherwise.
     """
+    config.i += 1
+    print(config.i, "_export_table_to_tsv")
     try:
         required_attrs = ["catalog_name", "schema_name", "mode", "volume_name"]
         for attr in required_attrs:
@@ -1232,7 +1242,7 @@ def _export_table_to_tsv(df, config):
         )
 
         try:
-            create_folder_if_not_exists(folder_path)
+            create_folder_if_not_exists(config,folder_path)
         except Exception as e:
             print(f"Error creating output directory '{folder_path}': {str(e)}")
             return False
@@ -1313,8 +1323,10 @@ class ExportError(Exception):
     """Custom exception for export errors."""
 
 
-def create_folder_if_not_exists(path: str) -> None:
+def create_folder_if_not_exists(config, path: str) -> None:
     """Create directory if it doesn't exist. For Unity Catalog volumes, directories are created automatically."""
+    config.i += 1
+    print(config.i, "create_folder_if_not_exists")
     try:
         if not os.path.exists(path):
             os.makedirs(path)
@@ -1324,7 +1336,9 @@ def create_folder_if_not_exists(path: str) -> None:
         raise ExportError(f"Directory creation failed: {e}") from e
 
 
-def export_df_to_excel(df: pd.DataFrame, output_file: str, export_folder: str) -> None:
+def export_df_to_excel(config, df: pd.DataFrame, output_file: str, export_folder: str) -> None:
+    config.i += 1
+    print(config.i, "export_df_to_excel")
     try:
         local_path = f"/local_disk0/tmp/{output_file}"
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
@@ -1379,6 +1393,8 @@ def _export_table_to_excel(df: Any, config: Any) -> str:
     Raises:
         ExportError: If export fails
     """
+    config.i += 1
+    print(config.i, "_export_table_to_excel")
     date = datetime.now().strftime("%Y%m%d")
     if not hasattr(config, "log_timestamp") or not config.log_timestamp:
         config.log_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -1391,7 +1407,7 @@ def _export_table_to_excel(df: Any, config: Any) -> str:
             f"/Volumes/{config.catalog_name}/{config.schema_name}/{config.volume_name}"
         )
         export_folder = f"{volume_path}/{current_user}/{date}/exportable_run_logs/"
-        create_folder_if_not_exists(export_folder)
+        create_folder_if_not_exists(config,export_folder)
         output_filename = f"review_metadata_{config.mode}_{config.log_timestamp}.xlsx"
         output_file = f"{export_folder}{output_filename}"
 
@@ -1413,7 +1429,7 @@ def _export_table_to_excel(df: Any, config: Any) -> str:
 
         print(f"Writing to Excel file: {output_filename}")
         logger.info(f"Writing to Excel file: {output_filename}")
-        export_df_to_excel(pdf, output_filename, export_folder)
+        export_df_to_excel(config,pdf, output_filename, export_folder)
 
         print("Export completed successfully")
         logger.info("Export completed successfully")
@@ -1431,6 +1447,8 @@ def log_metadata_generation(
     """
     Log the metadata generation to the unified log table.
     """
+    config.i += 1
+    print(config.i, "log_metadata_generation")
     run_log_table_ddl(config)
     df = df.withColumn("metadata_type", lit(config.mode))
 
@@ -1513,6 +1531,8 @@ def filter_and_write_ddl(
         current_user: str
         current_date: str
     """
+    config.i += 1
+    print(config.i, "filter_and_write_ddl")
     print(
         "Filtering dataframe based on table name to write DDL to SQL file in volume..."
     )
@@ -1521,7 +1541,7 @@ def filter_and_write_ddl(
     file_root = f"{table_name}_{config.mode}"
 
     try:
-        write_ddl_to_volume_spark_native(
+        write_ddl_to_volume_spark_native(config,
             df, file_root, base_path, config.ddl_output_format
         )
         df = df.withColumn("status", lit("Success"))
@@ -1548,14 +1568,16 @@ def filter_and_write_ddl(
             )
 
 
-def write_ddl_to_volume_spark_native(
+def write_ddl_to_volume_spark_native(config,
     df: DataFrame, file_name: str, base_path: str, output_format: str
 ):
     """
     Write DDL statements to volume using collect() - simpler approach for compatibility.
     """
+    config.i += 1
+    print(config.i, "write_ddl_to_volume_spark_native")
     try:
-        create_folder_if_not_exists(base_path)
+        create_folder_if_not_exists(config,base_path)
     except Exception as e:
         print(
             f"Error creating folder: {e}. Check if Volume exists and if your permissions are correct."
@@ -1589,17 +1611,17 @@ def write_ddl_to_volume_spark_native(
         ddl_list = [row.ddl for row in ddl_statements]
 
         pdf = pd.DataFrame(ddl_list, columns=["ddl"])
-        df_column_to_excel_file(pdf, file_name, base_path, "ddl")
+        df_column_to_excel_file(config,pdf, file_name, base_path, "ddl")
     else:
         raise ValueError(
             "Invalid output format. Please choose either 'sql', 'tsv' or 'excel'."
         )
 
 
-def write_ddl_to_volume(file_name, base_path, ddl_statements, output_format):
+def write_ddl_to_volume(config,file_name, base_path, ddl_statements, output_format):
     """Legacy function kept for backward compatibility"""
     try:
-        create_folder_if_not_exists(base_path)
+        create_folder_if_not_exists(config,base_path)
     except Exception as e:
         print(
             f"Error creating folder: {e}. Check if Volume exists and if your permissions are correct."
@@ -1612,7 +1634,7 @@ def write_ddl_to_volume(file_name, base_path, ddl_statements, output_format):
     elif output_format == "excel":
         ddl_list = [row.ddl for row in ddl_statements]
         df = pd.DataFrame(ddl_list, columns=["ddl"])
-        df_column_to_excel_file(df, file_name, base_path, "ddl")
+        df_column_to_excel_file(config,df, file_name, base_path, "ddl")
     else:
         raise ValueError(
             "Invalid output format. Please choose either 'sql', 'tsv' or 'excel'."
@@ -1632,6 +1654,8 @@ def create_and_persist_ddl(
         table_name (str): A list of table names.
         volume_name (str): The volume name.
     """
+    config.i += 1
+    print(config.i, "process_and_add_ddl")
     print("Running create and persist ddl...")
     current_user = get_current_user()
     current_user_sanitized = sanitize_user_identifier(current_user)
@@ -2888,6 +2912,7 @@ def generate_and_persist_metadata(config: Any) -> None:
                 
                 # Mark table as completed in control table
                 if config.control_table:
+                    # blarg11
                     mark_table_completed(table, config)
 
         except TableProcessingError as tpe:

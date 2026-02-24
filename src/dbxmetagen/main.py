@@ -372,7 +372,10 @@ def main(kwargs):
         # Generate metadata
         # blarg
         config.i += 1
+        print("\n\n\n==================================")
         print(config.i, "generate metadata")
+        print("==================================\n\n\n")
+
         generate_and_persist_metadata(config)
 
         # # Grant permissions on created objects
