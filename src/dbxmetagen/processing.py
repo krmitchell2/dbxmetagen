@@ -2748,10 +2748,12 @@ def generate_and_persist_metadata(config: Any) -> None:
                     "_updated_at": str(datetime.now()),
                 }
             else:
+                # blarg here
                 df = process_and_add_ddl(config, table)
                 logger.info(
                     f"[generate_and_persist_metadata] Generating and persisting ddl for {table}..."
                 )
+                # blarg and here
                 create_and_persist_ddl(df, config, table)
 
                 # Check if DDL application had any failures

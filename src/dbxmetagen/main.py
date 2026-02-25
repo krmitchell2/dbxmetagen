@@ -321,7 +321,7 @@ def main(kwargs):
 
     # Initialize configuration and benchmarking
     config = MetadataConfig(**kwargs)
-    print("config", config)
+    print("config", config.__dict__)
     experiment_name = setup_benchmarking(config)
 
     # Validate override CSV (only if manual overrides are enabled)
