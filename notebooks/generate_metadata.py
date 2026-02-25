@@ -1,7 +1,9 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # GenAI-Assisted Metadata Utility (a.k.a `dbxmetagen`)
+
 # COMMAND ----------
+
 # MAGIC %md
 # MAGIC #`dbxmetagen` Overview
 # MAGIC ### This is a utility to help generate high quality descriptions for tables and columns to enhance enterprise search and data governance, identify and classify PI, improve Databricks Genie performance for Text-2-SQL, and generally help curate a high quality metadata layer and data dictionary for enterprise data.
@@ -12,16 +14,24 @@
 # MAGIC
 # MAGIC ###Disclaimer
 # MAGIC AI generated comments are not always accurate and comment DDLs should be reviewed prior to modifying your tables. Databricks strongly recommends human review of AI-generated comments to check for inaccuracies. While the model has been guided to avoids generating harmful or inappropriate descriptions, you can mitigate this risk by setting up [AI Guardrails](https://docs.databricks.com/en/ai-gateway/index.html#ai-guardrails) in the AI Gateway where you connect your LLM.
+
 # COMMAND ----------
+
 # MAGIC %md
 # MAGIC # Library installs
+
 # COMMAND ----------
+
 # MAGIC %pip install -qqqq -r ../requirements.txt
 # MAGIC dbutils.library.restartPython()
+
 # COMMAND ----------
+
 # MAGIC %md
 # MAGIC # Library imports, widgets, and environment
+
 # COMMAND ----------
+
 import sys
 
 sys.path.append("../")
@@ -31,8 +41,12 @@ from src.dbxmetagen.databricks_utils import (
     setup_notebook_variables,
 )
 from src.dbxmetagen.config import MetadataConfig
+import pprint
 
 setup_widgets(dbutils)
 notebook_variables = setup_notebook_variables(dbutils)
+pprint.pprint(notebook_variables)
+
 # COMMAND ----------
+
 main(notebook_variables)
