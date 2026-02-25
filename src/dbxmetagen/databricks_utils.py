@@ -1,7 +1,7 @@
-# """Databricks environment setup utilities."""
+"""Databricks environment setup utilities."""
 
 # import os
-# import json
+import json
 # import logging
 # from databricks.sdk import WorkspaceClient
 # from pyspark.sql import SparkSession
@@ -55,26 +55,26 @@
 #     return current_user
 
 
-def get_job_context(job_id, dbutils_instance=None):
-    """Get job context information if running in a job."""
-    try:
-        if job_id:
-            return job_id
+# def get_job_context(job_id, dbutils_instance=None):
+#     """Get job context information if running in a job."""
+#     try:
+#         if job_id:
+#             return job_id
 
-        if dbutils_instance:
-            context_json = (
-                dbutils_instance.notebook.entry_point.getDbutils()
-                .notebook()
-                .getContext()
-                .safeToJson()
-            )
-            context = json.loads(context_json)
-            return context.get("tags", {}).get("jobId")
+#         if dbutils_instance:
+#             context_json = (
+#                 dbutils_instance.notebook.entry_point.getDbutils()
+#                 .notebook()
+#                 .getContext()
+#                 .safeToJson()
+#             )
+#             context = json.loads(context_json)
+#             return context.get("tags", {}).get("jobId")
 
-        return None
-    except Exception as e:
-        print(f"Error getting job context: {e}")
-        return None
+#         return None
+#     except Exception as e:
+#         print(f"Error getting job context: {e}")
+#         return None
 
 
 def get_task_id(dbutils_instance=None):
@@ -108,28 +108,28 @@ def get_task_id(dbutils_instance=None):
             if user:
                 return user
         # Try WorkspaceClient as fallback
-        try:
-            w = WorkspaceClient()
-            user = w.current_user.me().user_name
-            if user:
-                return user
-        except Exception:
-            pass
-        # Last resort: UUID (should rarely happen)
-        import uuid
-        return str(uuid.uuid4())
+        # try:
+        #     w = WorkspaceClient()
+        #     user = w.current_user.me().user_name
+        #     if user:
+        #         return user
+        # except Exception:
+        #     pass
+        # # Last resort: UUID (should rarely happen)
+        # import uuid
+        # return str(uuid.uuid4())
     except Exception as e:
         print(f"Error getting task ID: {e}")
-        # Try to get user even on error
-        try:
-            w = WorkspaceClient()
-            user = w.current_user.me().user_name
-            if user:
-                return user
-        except Exception:
-            pass
-        import uuid
-        return str(uuid.uuid4())
+    #     # Try to get user even on error
+    #     try:
+    #         w = WorkspaceClient()
+    #         user = w.current_user.me().user_name
+    #         if user:
+    #             return user
+    #     except Exception:
+    #         pass
+    #     import uuid
+    #     return str(uuid.uuid4())
 
 
 # def setup_widgets(dbutils):
@@ -157,11 +157,11 @@ def get_task_id(dbutils_instance=None):
 
 def get_widgets(dbutils):
     """Get widgets for the notebook."""
-    cleanup_control_table = dbutils.widgets.get("cleanup_control_table")
+    # cleanup_control_table = dbutils.widgets.get("cleanup_control_table")
     mode = dbutils.widgets.get("mode")
     env = dbutils.widgets.get("env")
     catalog_name = dbutils.widgets.get("catalog_name")
-    schema_name = dbutils.widgets.get("schema_name")
+    # schema_name = dbutils.widgets.get("schema_name")
     host_name = dbutils.widgets.get("host")
     table_names = dbutils.widgets.get("table_names")
     current_user = dbutils.widgets.get("current_user")
@@ -219,51 +219,51 @@ def get_notebook_path(dbutils_instance):
 
 def setup_notebook_variables(dbutils):
     """Setup notebook variables and validate required parameters."""
-    try:
-        job_id = dbutils.widgets.get("job_id")
-    except ValueError:
-        job_id = None
-    try:
-        run_id = dbutils.widgets.get("run_id")
-    except ValueError:
-        run_id = None
-    try:
-        notebook_variables = get_widgets(dbutils)
-    except Exception:
-        notebook_variables = {}
-    job_id = get_job_context(job_id, dbutils)
-    task_id = get_task_id(dbutils)
-    current_user = get_current_user(dbutils_instance=dbutils)
-    notebook_path = get_notebook_path(dbutils)
-    notebook_variables["job_id"] = job_id
-    notebook_variables["run_id"] = run_id
-    notebook_variables["task_id"] = task_id
-    notebook_variables["current_user"] = current_user
-    notebook_variables["notebook_path"] = notebook_path
+    # try:
+    #     job_id = dbutils.widgets.get("job_id")
+    # except ValueError:
+    #     job_id = None
+    # try:
+    #     run_id = dbutils.widgets.get("run_id")
+    # except ValueError:
+    #     run_id = None
+    # try:
+    #     notebook_variables = get_widgets(dbutils)
+    # except Exception:
+    #     notebook_variables = {}
+    # job_id = get_job_context(job_id, dbutils)
+    # task_id = get_task_id(dbutils)
+    # current_user = get_current_user(dbutils_instance=dbutils)
+    # notebook_path = get_notebook_path(dbutils)
+    # notebook_variables["job_id"] = job_id
+    # notebook_variables["run_id"] = run_id
+    # notebook_variables["task_id"] = task_id
+    # notebook_variables["current_user"] = current_user
+    # notebook_variables["notebook_path"] = notebook_path
 
-    # Validate required parameters
-    catalog_name = notebook_variables.get("catalog_name", "")
-    table_names = notebook_variables.get("table_names", "")
+    # # Validate required parameters
+    # catalog_name = notebook_variables.get("catalog_name", "")
+    # table_names = notebook_variables.get("table_names", "")
 
-    # Check if catalog_name is missing or set to 'none'
-    if not catalog_name or catalog_name.lower() in ["none", "null", ""]:
-        raise ValueError(
-            "[ERROR] REQUIRED PARAMETER MISSING: catalog_name\n\n"
-            "Please provide a valid catalog name using the 'Catalog Name (required)' widget.\n"
-            "The catalog name cannot be 'none', 'null', or empty.\n\n"
-            "Example: my_catalog"
-        )
+    # # Check if catalog_name is missing or set to 'none'
+    # if not catalog_name or catalog_name.lower() in ["none", "null", ""]:
+    #     raise ValueError(
+    #         "[ERROR] REQUIRED PARAMETER MISSING: catalog_name\n\n"
+    #         "Please provide a valid catalog name using the 'Catalog Name (required)' widget.\n"
+    #         "The catalog name cannot be 'none', 'null', or empty.\n\n"
+    #         "Example: my_catalog"
+    #     )
 
-    # Check if table_names is missing or set to 'none'
-    if not table_names or table_names.lower() in ["none", "null", ""]:
-        raise ValueError(
-            "[ERROR] REQUIRED PARAMETER MISSING: table_names\n\n"
-            "Please provide table names using the 'Table Names - comma-separated (required)' widget.\n"
-            "Specify one or more tables in the format: catalog.schema.table\n\n"
-            "Examples:\n"
-            "  - Single table: my_catalog.my_schema.my_table\n"
-            "  - Multiple tables: my_catalog.schema1.table1, my_catalog.schema2.table2"
-        )
+    # # Check if table_names is missing or set to 'none'
+    # if not table_names or table_names.lower() in ["none", "null", ""]:
+    #     raise ValueError(
+    #         "[ERROR] REQUIRED PARAMETER MISSING: table_names\n\n"
+    #         "Please provide table names using the 'Table Names - comma-separated (required)' widget.\n"
+    #         "Specify one or more tables in the format: catalog.schema.table\n\n"
+    #         "Examples:\n"
+    #         "  - Single table: my_catalog.my_schema.my_table\n"
+    #         "  - Multiple tables: my_catalog.schema1.table1, my_catalog.schema2.table2"
+    #     )
 
     return notebook_variables
 

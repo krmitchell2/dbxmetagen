@@ -1,6 +1,6 @@
 # import os
 # import json
-# import logging
+import logging
 # from typing import Dict, Any, List, Tuple, Optional
 # from presidio_analyzer import (
 #     AnalyzerEngine,
@@ -8,7 +8,7 @@
 #     RecognizerResult,
 #     Pattern,
 # )
-# import spacy
+import spacy
 # from datetime import datetime
 
 # from src.dbxmetagen.config import MetadataConfig
@@ -341,18 +341,18 @@
 #     return results
 
 
-# def ensure_spacy_model(model_name: str = "en_core_web_lg"):
-#     """
-#     Load pre-installed spaCy model. Model should be installed via requirements.txt.
-#     """
-#     try:
-#         return spacy.load(model_name)
-#     except OSError as exc:
-#         logging.error("Error loading spaCy model: %s", exc)
-#         raise RuntimeError(
-#             f"spaCy model '{model_name}' not found. "
-#             f"Ensure it's installed via requirements.txt or run: python -m spacy download {model_name}"
-#         )
+def ensure_spacy_model(model_name: str = "en_core_web_lg"):
+    """
+    Load pre-installed spaCy model. Model should be installed via requirements.txt.
+    """
+    try:
+        return spacy.load(model_name)
+    except OSError as exc:
+        logging.error("Error loading spaCy model: %s", exc)
+        raise RuntimeError(
+            f"spaCy model '{model_name}' not found. "
+            f"Ensure it's installed via requirements.txt or run: python -m spacy download {model_name}"
+        )
 
 
 # def detect_pi(config, input_data: Dict[str, Any]) -> str:

@@ -1,31 +1,31 @@
-# from abc import ABC, abstractmethod
-# import json
-# import mlflow
-# from pydantic import ValidationError
-# from typing import Tuple, Dict, List, Any, Union, Optional
-# from openai.types.chat.chat_completion import ChatCompletion
-# from pydantic import BaseModel, ConfigDict, field_validator
-# from src.dbxmetagen.config import MetadataConfig
-# from src.dbxmetagen.error_handling import exponential_backoff
-# from src.dbxmetagen.chat_client import ChatClientFactory
+from abc import ABC, abstractmethod
+import json
+import mlflow
+from pydantic import ValidationError
+from typing import Tuple, Dict, List, Any, Union, Optional
+from openai.types.chat.chat_completion import ChatCompletion
+from pydantic import BaseModel, ConfigDict, field_validator
+from src.dbxmetagen.config import MetadataConfig
+from src.dbxmetagen.error_handling import exponential_backoff
+from src.dbxmetagen.chat_client import ChatClientFactory
 
 
-# class Response(BaseModel):
-#     model_config = ConfigDict(extra="forbid")
-#     table: str
-#     columns: List[str]
+class Response(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    table: str
+    columns: List[str]
 
 
-# class PIColumnContent(BaseModel):
-#     classification: str
-#     type: str
-#     confidence: float
+class PIColumnContent(BaseModel):
+    classification: str
+    type: str
+    confidence: float
 
 
-# class PIResponse(Response):
-#     model_config = ConfigDict(extra="forbid")
-#     column_contents: List[PIColumnContent]
-#     presidio_results: Optional[str] = None
+class PIResponse(Response):
+    model_config = ConfigDict(extra="forbid")
+    column_contents: List[PIColumnContent]
+    presidio_results: Optional[str] = None
 
 
 # class CommentResponse(Response):
@@ -104,23 +104,23 @@
 #     pass
 
 
-# class MetadataGenerator(ABC):
-#     def from_context(self, config):
-#         config.i += 1
-#         print(config.i, "MetadataGenerator.from_context")
-#         self.config = config
-#         self.chat_client = ChatClientFactory.create_client(config)
+class MetadataGenerator(ABC):
+    def from_context(self, config):
+        # config.i += 1
+        # print(config.i, "MetadataGenerator.from_context")
+        self.config = config
+        self.chat_client = ChatClientFactory.create_client(config)
 
-#     @abstractmethod
-#     def get_responses(
-#         self, prompt=None, prompt_content=None
-#     ) -> Tuple[Response, ChatCompletion]:
-#         """Abstract method to get responses from the chat client.
+    @abstractmethod
+    def get_responses(
+        self, prompt=None, prompt_content=None
+    ) -> Tuple[Response, ChatCompletion]:
+        """Abstract method to get responses from the chat client.
 
-#         Args:
-#             prompt: The prompt to use for the chat client.
-#             prompt_content: The prompt content to use for the chat client.
-#         """
+        Args:
+            prompt: The prompt to use for the chat client.
+            prompt_content: The prompt content to use for the chat client.
+        """
 
 
 # class CommentGenerator(MetadataGenerator):
@@ -259,25 +259,25 @@
 #         return True
 
 
-# class PIIdentifier(MetadataGenerator):
-#     def get_responses(
-#         self, prompt, prompt_content
-#     ) -> Tuple[PIResponse, ChatCompletion]:
-#         prompt_size = len(json.dumps(prompt))
-#         if prompt_size > self.config.max_prompt_length * 5:
-#             raise ValueError(
-#                 f"The prompt template is too long ({prompt_size} chars). Please reduce the "
-#                 f"number of columns or increase the max_prompt_length."
-#             )
-#         comment_response, message_payload = self.get_pi_response(
-#             self.config,
-#             content=prompt_content,
-#             prompt_content=prompt[self.config.mode],
-#             model=self.config.model,
-#             max_tokens=self.config.max_tokens,
-#             temperature=self.config.temperature,
-#         )
-#         return comment_response, message_payload
+class PIIdentifier(MetadataGenerator):
+    def get_responses(
+        self, prompt, prompt_content
+    ) -> Tuple[PIResponse, ChatCompletion]:
+        prompt_size = len(json.dumps(prompt))
+        if prompt_size > self.config.max_prompt_length * 5:
+            raise ValueError(
+                f"The prompt template is too long ({prompt_size} chars). Please reduce the "
+                f"number of columns or increase the max_prompt_length."
+            )
+        comment_response, message_payload = self.get_pi_response(
+            self.config,
+            content=prompt_content,
+            prompt_content=prompt[self.config.mode],
+            model=self.config.model,
+            max_tokens=self.config.max_tokens,
+            temperature=self.config.temperature,
+        )
+        return comment_response, message_payload
 
 #     def predict_chat_response(self, prompt_content):
 #         try:
@@ -386,22 +386,23 @@
 #         return True
 
 
-# class MetadataGeneratorFactory:
-#     @staticmethod
-#     def create_generator(config) -> MetadataGenerator:
-#         config.i += 1
-#         print(config.i, "MetadataGeneratorFactory.create_generator")
-#         if config.mode == "comment":
-#             config.i += 1
-#             print(config.i, "MetadataGeneratorFactory config mode comment")
-#             generator = CommentGenerator()
-#             generator.from_context(config)
-#             return generator
-#         elif config.mode == "pi":
-#             config.i += 1
-#             print(config.i, "MetadataGeneratorFactory config mode pi")
-#             generator = PIIdentifier()
-#             generator.from_context(config)
-#             return generator
-#         else:
-#             raise ValueError("Invalid mode. Use 'pi' or 'comment'.")
+class MetadataGeneratorFactory:
+    @staticmethod
+    def create_generator(config) -> MetadataGenerator:
+    #     config.i += 1
+    #     print(config.i, "MetadataGeneratorFactory.create_generator")
+        if config.mode == "comment":
+            # config.i += 1
+            # print(config.i, "MetadataGeneratorFactory config mode comment")
+            # generator = CommentGenerator()
+            # generator.from_context(config)
+            # return generator
+            x=1
+        elif config.mode == "pi":
+            # config.i += 1
+            # print(config.i, "MetadataGeneratorFactory config mode pi")
+            generator = PIIdentifier()
+            generator.from_context(config)
+            return generator
+        else:
+            raise ValueError("Invalid mode. Use 'pi' or 'comment'.")

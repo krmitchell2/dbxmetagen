@@ -1,40 +1,40 @@
-# """A fair amount of this is stubbed out for future flexibility
-# around alternative API endpoints.
+"""A fair amount of this is stubbed out for future flexibility
+around alternative API endpoints.
 
-# Need to improve NotImplementedError, deprecated marks, and other indications of stubbed out code.
-# """
+Need to improve NotImplementedError, deprecated marks, and other indications of stubbed out code.
+"""
 
-# import os
-# import json
-# import re
-# import requests
-# import mlflow
-# import time
-# from abc import ABC, abstractmethod
-# from typing import List, Dict, Any
-# from openai import OpenAI
-# from databricks_langchain import ChatDatabricks
-# from databricks.sdk import WorkspaceClient
-# from pydantic import BaseModel
-# import json
-# from openai.types.chat.chat_completion import ChatCompletion, Choice
-# from openai.types.chat.chat_completion_message import ChatCompletionMessage
+import os
+import json
+import re
+import requests
+import mlflow
+import time
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any
+from openai import OpenAI
+from databricks_langchain import ChatDatabricks
+from databricks.sdk import WorkspaceClient
+from pydantic import BaseModel
+import json
+from openai.types.chat.chat_completion import ChatCompletion, Choice
+from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
 
-# class ChatClient(ABC):
-#     """Abstract base class for different chat completion clients."""
+class ChatClient(ABC):
+    """Abstract base class for different chat completion clients."""
 
-#     @abstractmethod
-#     def create_completion(
-#         self,
-#         messages: List[Dict[str, str]],
-#         model: str,
-#         max_tokens: int,
-#         temperature: float,
-#         **kwargs,
-#     ) -> Any:
-#         """Create a chat completion."""
-#         raise NotImplementedError
+    @abstractmethod
+    def create_completion(
+        self,
+        messages: List[Dict[str, str]],
+        model: str,
+        max_tokens: int,
+        temperature: float,
+        **kwargs,
+    ) -> Any:
+        """Create a chat completion."""
+        raise NotImplementedError
 
 #     @abstractmethod
 #     def create_structured_completion(
@@ -50,8 +50,8 @@
 #         raise NotImplementedError
 
 
-# class DatabricksClient(ChatClient):
-#     """Client for Databricks native chat completions."""
+class DatabricksClient(ChatClient):
+    """Client for Databricks native chat completions."""
 
 #     def __init__(self):
 #         # Get credentials from environment (should be set in Databricks runtime)
@@ -405,44 +405,44 @@
 #             raise ValueError(f"Unexpected error parsing structured response: {e}")
 
 
-# class ChatClientFactory:
-#     """Factory class to create appropriate chat clients based on configuration."""
+class ChatClientFactory:
+    """Factory class to create appropriate chat clients based on configuration."""
 
-#     @staticmethod
-#     def create_client(config) -> ChatClient:
-#         """Create a chat client based on the configuration."""
-#         config.i += 1
-#         print(config.i, "ChatClientFactory.create_client")
-#         chat_type = getattr(config, "chat_completion_type", "databricks")
+    @staticmethod
+    def create_client(config) -> ChatClient:
+        """Create a chat client based on the configuration."""
+        config.i += 1
+        print(config.i, "ChatClientFactory.create_client")
+        chat_type = getattr(config, "chat_completion_type", "databricks")
 
-#         if chat_type == "databricks":
-#             return DatabricksClient()
+        if chat_type == "databricks":
+            return DatabricksClient()
 
-#         elif chat_type == "openai_spec":
-#             print("TODO openai spec")
-#             if not config.custom_endpoint_url:
-#                 raise ValueError("custom_endpoint_url is required for openai_spec type")
+        elif chat_type == "openai_spec":
+            print("TODO openai spec")
+            if not config.custom_endpoint_url:
+                raise ValueError("custom_endpoint_url is required for openai_spec type")
 
-#             api_key = ChatClientFactory._get_secret_from_scope(
-#                 config.custom_endpoint_secret_scope, config.custom_endpoint_secret_key
-#             )
-#             return OpenAISpecClient(config.custom_endpoint_url, api_key)
+            api_key = ChatClientFactory._get_secret_from_scope(
+                config.custom_endpoint_secret_scope, config.custom_endpoint_secret_key
+            )
+            return OpenAISpecClient(config.custom_endpoint_url, api_key)
 
-#         elif chat_type == "custom_chat_spec":
-#             print("TODO custom chat spec")
+        elif chat_type == "custom_chat_spec":
+            print("TODO custom chat spec")
 
-#             if not config.custom_endpoint_url:
-#                 raise ValueError(
-#                     "custom_endpoint_url is required for custom_chat_spec type"
-#                 )
+            if not config.custom_endpoint_url:
+                raise ValueError(
+                    "custom_endpoint_url is required for custom_chat_spec type"
+                )
 
-#             api_key = ChatClientFactory._get_secret_from_scope(
-#                 config.custom_endpoint_secret_scope, config.custom_endpoint_secret_key
-#             )
-#             return CustomChatSpecClient(config.custom_endpoint_url, api_key)
+            api_key = ChatClientFactory._get_secret_from_scope(
+                config.custom_endpoint_secret_scope, config.custom_endpoint_secret_key
+            )
+            return CustomChatSpecClient(config.custom_endpoint_url, api_key)
 
-#         else:
-#             raise ValueError(f"Unknown chat completion type: {chat_type}")
+        else:
+            raise ValueError(f"Unknown chat completion type: {chat_type}")
 
 #     @staticmethod
 #     def _get_secret_from_scope(scope: str, key: str) -> str:
