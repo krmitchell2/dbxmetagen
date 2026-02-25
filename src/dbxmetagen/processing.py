@@ -2611,13 +2611,18 @@ def setup_ddl(config: MetadataConfig) -> None:
     spark = SparkSession.builder.getOrCreate()
     ### Add error handling here
     if config.schema_name:
-        spark.sql(
-            f"CREATE SCHEMA IF NOT EXISTS {config.catalog_name}.{config.schema_name};"
+        print("config.schema_name", config.schema_name)
+        sql = f"CREATE SCHEMA IF NOT EXISTS {config.catalog_name}.{config.schema_name};"
+        print("query,", sql)
+        spark.sql(sql
         )
     volume_sql = f"CREATE VOLUME IF NOT EXISTS {config.catalog_name}.{config.schema_name}.{config.volume_name};"
 
     if config.volume_name:
+
         spark.sql(volume_sql)
+        print("query,", volume_sql)
+
         review_output_path = f"/Volumes/{config.catalog_name}/{config.schema_name}/{config.volume_name}/{sanitize_user_identifier(config.current_user)}/reviewed_outputs/"
         os.makedirs(review_output_path, exist_ok=True)
 
@@ -2634,9 +2639,11 @@ def create_tables(config: MetadataConfig) -> None:
     """
     spark = SparkSession.builder.getOrCreate()
     if config.control_table:
+        print("config.control_table",config.control_table)
         formatted_control_table = get_control_table(config)
+        print("formatted_control_table",formatted_control_table)
         logger.info("Formatted control table...", formatted_control_table)
-        spark.sql(
+        sql = (
             f"""CREATE TABLE IF NOT EXISTS {config.catalog_name}.{config.schema_name}.{formatted_control_table} (
                 table_name STRING,
                 _updated_at TIMESTAMP,
@@ -2649,6 +2656,9 @@ def create_tables(config: MetadataConfig) -> None:
                 _error_message STRING
             )"""
         )
+        spark.sql(sql
+        )
+        print("query", sql)
 
 
 def instantiate_metadata_objects(
@@ -2711,6 +2721,10 @@ def generate_and_persist_metadata(config: Any) -> None:
     skipped_tables = []
 
     for table in config.table_names:
+        print("\n\n\n=================\n\n\n")
+        print("processing", table)
+        print("\n\n\n=================\n\n\n")
+
         log_dict = {}
         try:
             logger.info(f"[generate_and_persist_metadata] Processing table {table}...")
@@ -2937,7 +2951,7 @@ def upsert_table_names_to_control_table(
     """
     import time
     import random
-    
+    print("================================")
     print(f"Upserting table names to control table {table_names}...")
     spark = SparkSession.builder.getOrCreate()
     formatted_control_table = get_control_table(config)

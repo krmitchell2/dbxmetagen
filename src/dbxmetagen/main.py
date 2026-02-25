@@ -53,16 +53,17 @@ def validate_runtime_compatibility(dbr_version, config):
 def setup_mode_dependencies(config):
     """Setup mode-specific dependencies and validate configurations."""
     if config.mode == "pi":
+        print("ensuring spacy model")
         if config.include_deterministic_pi or config.include_deterministic_pi == "true":
             ensure_spacy_model(config.spacy_model_names)
 
-    elif config.mode == "domain":
-        if not os.path.exists(config.domain_config_path):
-            print(f"Warning: Domain config not found at {config.domain_config_path}")
-            print("Domain classification will use fallback configuration")
+    # elif config.mode == "domain":
+    #     if not os.path.exists(config.domain_config_path):
+    #         print(f"Warning: Domain config not found at {config.domain_config_path}")
+    #         print("Domain classification will use fallback configuration")
 
-    elif config.mode == "comment":
-        pass
+    # elif config.mode == "comment":
+    #     pass
 
     else:
         raise ValueError(
@@ -72,6 +73,7 @@ def setup_mode_dependencies(config):
 
 def setup_environment(config):
     """Setup Databricks environment variables."""
+    print("config.base_url", config.base_url)
     if not os.environ.get("DATABRICKS_HOST") and config.base_url:
         os.environ["DATABRICKS_HOST"] = config.base_url
 
@@ -81,6 +83,7 @@ def initialize_infrastructure(config):
     setup_ddl(config)
     create_tables(config)
     config.table_names = setup_queue(config)
+    print("config.table_names", config.table_names)
     if config.control_table:
         upsert_table_names_to_control_table(config.table_names, config)
     print("Running generate on...", config.table_names)
@@ -211,7 +214,9 @@ def cleanup_resources(config, spark):
 
     # Clean up temp table
     try:
-        spark.sql(f"DROP TABLE IF EXISTS {temp_table}")
+        sql = f"DROP TABLE IF EXISTS {temp_table}"
+        print("QUERY ", sql)
+        spark.sql(sql)
         print(f"Cleaned up temp table: {temp_table}")
     except Exception as e:
         print(f"Temp table cleanup failed: {e}")
@@ -229,36 +234,47 @@ def cleanup_resources(config, spark):
                 
                 if cleanup_failed:
                     # Delete all entries for this run (completed AND failed)
-                    spark.sql(
-                        f"DELETE FROM {control_table_full} WHERE _run_id = '{config.run_id}'"
+                    print("query")
+                    sql = f"DELETE FROM {control_table_full} WHERE _run_id = '{config.run_id}'"
+
+                    print("QUERY ", sql)
+
+                    spark.sql(sql
                     )
                     print(
                         f"Cleaned up all control table rows for run_id {config.run_id}: {control_table_full}"
                     )
                 else:
                     # Only delete completed entries, keep failed for potential retry
-                    spark.sql(
-                        f"DELETE FROM {control_table_full} WHERE _run_id = '{config.run_id}' AND _status = 'completed'"
+                    sql = f"DELETE FROM {control_table_full} WHERE _run_id = '{config.run_id}' AND _status = 'completed'"
+                    print("query", sql)
+                    spark.sql(sql
                     )
                     print(
                         f"Cleaned up completed control table rows for run_id {config.run_id}: {control_table_full}"
                     )
                     # Log if there are failed entries remaining
-                    failed_count = spark.sql(
-                        f"SELECT COUNT(*) as cnt FROM {control_table_full} WHERE _run_id = '{config.run_id}' AND _status = 'failed'"
+                    sql = f"SELECT COUNT(*) as cnt FROM {control_table_full} WHERE _run_id = '{config.run_id}' AND _status = 'failed'"
+                    print("query", sql)
+
+                    failed_count = spark.sql(sql
                     ).first().cnt
                     if failed_count > 0:
                         print(f"Note: {failed_count} failed table(s) retained for potential retry")
             elif config.job_id is not None:
                 # Fallback to job_id for backward compatibility
-                spark.sql(
-                    f"DELETE FROM {control_table_full} WHERE _job_id = '{config.job_id}'"
+                sql =  f"DELETE FROM {control_table_full} WHERE _job_id = '{config.job_id}'"
+
+                print("query", sql)
+                spark.sql(sql
                 )
                 print(
                     f"Cleaned up control table rows for job_id {config.job_id}: {control_table_full}"
                 )
             else:
-                spark.sql(f"DROP TABLE IF EXISTS {control_table_full}")
+                sql = f"DROP TABLE IF EXISTS {control_table_full}"
+                print("QUERY", sql)
+                spark.sql(sql)
                 print(f"Dropped control table: {control_table_full}")
     except Exception as e:
         print(f"Control table cleanup skipped (table may not exist): {e}")
@@ -266,13 +282,17 @@ def cleanup_resources(config, spark):
 
 def main(kwargs):
     """Main function to generate metadata."""
+    print("kwargs",kwargs)
     # Initialize Spark and get runtime info
     spark = SparkSession.builder.getOrCreate()
     dbr_version = get_dbr_version()
 
     # Validate required parameters early
     catalog_name = kwargs.get("catalog_name", "")
+    print(catalog_name,"catalog_name")
     table_names = kwargs.get("table_names", "")
+    print(table_names,"table_names")
+
 
     if not catalog_name or str(catalog_name).lower() in ["none", "null", ""]:
         raise ValueError(
@@ -301,6 +321,7 @@ def main(kwargs):
 
     # Initialize configuration and benchmarking
     config = MetadataConfig(**kwargs)
+    print("config", config)
     experiment_name = setup_benchmarking(config)
 
     # Validate override CSV (only if manual overrides are enabled)
