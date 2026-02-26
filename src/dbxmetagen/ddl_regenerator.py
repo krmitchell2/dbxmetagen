@@ -7,6 +7,7 @@ import pandas as pd
 import openpyxl
 from shutil import copyfile
 from pyspark.sql import SparkSession
+import sys
 
 from src.dbxmetagen.config import MetadataConfig
 from src.dbxmetagen.processing import split_table_names
@@ -18,6 +19,7 @@ logging.basicConfig(
 
 
 def ensure_directory_exists(path: str) -> None:
+    print(sys._getframe().f_code.co_name)
     """
     Ensure that a directory exists; create it if it does not.
 
@@ -34,6 +36,7 @@ def ensure_directory_exists(path: str) -> None:
 
 
 def get_output_file_name(input_file: str, suffix: str) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Generate an output file name based on the input file's base name and a suffix.
 
@@ -49,6 +52,7 @@ def get_output_file_name(input_file: str, suffix: str) -> str:
 
 
 def load_metadata_file(file_path: str, file_type: str) -> pd.DataFrame:
+    print(sys._getframe().f_code.co_name)
     """
     Load metadata from a TSV or Excel file.
 
@@ -86,6 +90,7 @@ def load_metadata_file(file_path: str, file_type: str) -> pd.DataFrame:
 
 
 def get_comment_from_ddl(ddl: str) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Extract comment from DDL.
     """
@@ -96,6 +101,7 @@ def get_comment_from_ddl(ddl: str) -> str:
 
 
 def get_pii_tags_from_ddl(ddl: str, config: MetadataConfig) -> Tuple[str, str]:
+    print(sys._getframe().f_code.co_name)
     """
     Extract classification and subclassification from DDL statement.
     """
@@ -116,6 +122,7 @@ def get_pii_tags_from_ddl(ddl: str, config: MetadataConfig) -> Tuple[str, str]:
 
 
 def replace_comment_in_ddl(ddl: str, new_comment: str) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Replace the comment string in a DDL statement with a new comment.
     Only used for comment mode.
@@ -180,6 +187,7 @@ def replace_comment_in_ddl(ddl: str, new_comment: str) -> str:
 def replace_pii_tags_in_ddl(
     ddl: str, classification: str, subclassification: str, config: MetadataConfig
 ) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Replace the PII tagging strings in a DDL statement with new classification and subclassification.
     """
@@ -206,6 +214,7 @@ def replace_pii_tags_in_ddl(
 def update_ddl_row(
     mode: str, reviewed_column: str, row: pd.Series, config: MetadataConfig
 ) -> Union[str, Tuple[str]]:
+    print(sys._getframe().f_code.co_name)
     """
     Update a single row's DDL based on classification/type or column_content.
     """
@@ -238,6 +247,7 @@ def update_ddl_row(
 
 
 def check_file_type(file_name: str, config: MetadataConfig) -> None:
+    print(sys._getframe().f_code.co_name)
     """
     Check if the file type matches the specified export format.
     """
@@ -256,6 +266,7 @@ def check_file_type(file_name: str, config: MetadataConfig) -> None:
 def export_metadata(
     df: pd.DataFrame, output_dir: str, input_file: str, export_format: str
 ) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Export the DataFrame to the specified format.
 
@@ -331,6 +342,7 @@ def export_metadata(
 
 
 def extract_ddls_from_file(file_path: str, file_type: str) -> list:
+    print(sys._getframe().f_code.co_name)
     """
     Extract DDL statements from a SQL, XLSX, or TSV file.
     - For .sql: splits by semicolon.
@@ -367,6 +379,7 @@ def extract_ddls_from_file(file_path: str, file_type: str) -> list:
 def apply_ddl_to_databricks(
     sql_file: str, config: MetadataConfig, file_type: str
 ) -> None:
+    print(sys._getframe().f_code.co_name)
     """
     Apply DDL statements from a SQL, XLSX, or TSV file to Databricks Delta tables in Unity Catalog.
     """
@@ -396,6 +409,7 @@ def apply_ddl_to_databricks(
 def process_metadata_file(
     config: MetadataConfig, input_file: str, export_format: Optional[str] = None
 ) -> None:
+    print(sys._getframe().f_code.co_name)
     """
     Main processing function to load, update, export, and optionally apply DDLs.
 
