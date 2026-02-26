@@ -2,6 +2,7 @@ import mlflow
 from src.dbxmetagen.metadata_generator import CommentGenerator
 from src.dbxmetagen.chat_client import ChatClientFactory
 from src.dbxmetagen.config import MetadataConfig
+import sys
 
 
 # TODO: Delete unused function - CommentGeneratorModel is not used anywhere
@@ -12,13 +13,16 @@ class CommentGeneratorModel(CommentGenerator, mlflow.pyfunc.PythonModel):
     """
 
     def __init__(self, config: MetadataConfig):
+        print(sys._getframe().f_code.co_name)
         self.chat_client = None
         self.config = config
 
     def load_context(self, context):
+        print(sys._getframe().f_code.co_name)
         pass
 
     def predict(self, model_input):
+        print(sys._getframe().f_code.co_name)
         """
         This is a workaround to allow the config to be passed as a MetadataConfig object,
         which is not supported by the chat client.
@@ -34,6 +38,7 @@ class CommentGeneratorModel(CommentGenerator, mlflow.pyfunc.PythonModel):
             """
 
             def __init__(self, config_dict):
+                print(sys._getframe().f_code.co_name)
                 for key, value in config_dict.items():
                     setattr(self, key, value)
 
