@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Tuple
 import pandas as pd
 from src.dbxmetagen.deterministic_pi import detect_pi
+import sys
 
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import collect_list, struct, to_json, col
@@ -23,6 +24,7 @@ class Prompt(ABC):
     """
 
     def __init__(self, config: Any, df: DataFrame, full_table_name: str):
+        print(sys._getframe().f_code.co_name)
         """
         Initialize the Prompt class.
 
@@ -42,6 +44,7 @@ class Prompt(ABC):
 
     @abstractmethod
     def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Convert DataFrame to a dictionary format suitable for comment input.
 
@@ -51,6 +54,7 @@ class Prompt(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     def calculate_cell_length(self, pandas_df) -> pd.DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Calculate the length of every cell in the original DataFrame and truncate values longer than the word limit specified in the config.
 
@@ -59,6 +63,7 @@ class Prompt(ABC):
         """
 
         def truncate_value(value: str, word_limit: int) -> str:
+            print(sys._getframe().f_code.co_name)
             words = value.split()
             if len(words) > word_limit:
                 return " ".join(words[:word_limit])
@@ -93,6 +98,7 @@ class Prompt(ABC):
     def filter_extended_metadata_fields(
         self, extended_metadata_df: DataFrame
     ) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Filter extended metadata fields based on the current configuration mode.
 
@@ -123,6 +129,7 @@ class Prompt(ABC):
         return handler(extended_metadata_df)
 
     def _filter_pi_mode(self, df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """Filter metadata for PI mode (remove NULL values and existing PI tags to avoid bias)"""
         # Get configured tag names (with defaults)
         pi_classification_tag = getattr(
@@ -138,6 +145,7 @@ class Prompt(ABC):
         )
 
     def _filter_domain_mode(self, df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """Filter metadata for domain mode (remove NULL values and existing domain tags to avoid bias)"""
         # Get configured tag names (with defaults)
         domain_tag = getattr(self.config, "domain_tag_name", "domain")
@@ -149,6 +157,7 @@ class Prompt(ABC):
         )
 
     def _filter_comment_mode(self, df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """Filter metadata for comment mode with additional exclusions"""
         # Get configured tag names (with defaults) to avoid bias
         pi_classification_tag = getattr(
@@ -179,6 +188,7 @@ class Prompt(ABC):
         return filtered_df
 
     def add_metadata_to_comment_input(self) -> None:
+        print(sys._getframe().f_code.co_name)
         """
         Add metadata to the comment input.
         """
@@ -188,6 +198,7 @@ class Prompt(ABC):
         self.prompt_content["column_contents"]["column_metadata"] = column_metadata_dict
 
     def extract_column_metadata(self) -> Dict[str, Dict[str, Any]]:
+        print(sys._getframe().f_code.co_name)
         """
         Extract metadata for each column.
 
@@ -239,6 +250,7 @@ class Prompt(ABC):
     def get_column_constraints(
         self, column_name: str, combined_metadata: Dict[str, str]
     ):
+        print(sys._getframe().f_code.co_name)
         """
         Add column constraints to the column contents.
 
@@ -271,6 +283,7 @@ class Prompt(ABC):
     def add_column_metadata_to_column_contents(
         self, column_name: str, combined_metadata: Dict[str, Any]
     ) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Add column metadata to the column contents.
 
@@ -289,6 +302,7 @@ class Prompt(ABC):
     def add_table_metadata_to_column_contents(
         self, table_metadata: Tuple[Dict[str, str], str, str, str]
     ) -> None:
+        print(sys._getframe().f_code.co_name)
         """
         Add table metadata to the column contents.
 
@@ -302,6 +316,7 @@ class Prompt(ABC):
             self.prompt_content["column_contents"]["table_comments"] = table_comments
 
     def get_column_tags(self) -> Dict[str, Dict[str, str]]:
+        print(sys._getframe().f_code.co_name)
         """
         Get column tags from the information schema, filtering out biasing tags based on mode.
 
@@ -364,6 +379,7 @@ class Prompt(ABC):
         return column_tags_dict
 
     def get_table_tags(self) -> str:
+        print(sys._getframe().f_code.co_name)
         """
         Get table tags from the information schema, filtering out biasing tags based on mode.
 
@@ -414,6 +430,7 @@ class Prompt(ABC):
         return self.df_to_json(result_df)
 
     def get_table_constraints(self) -> str:
+        print(sys._getframe().f_code.co_name)
         """
         Get table constraints from the information schema.
 
@@ -439,6 +456,7 @@ class Prompt(ABC):
         return self.df_to_json(self.spark.sql(query))
 
     def get_table_comment(self) -> str:
+        print(sys._getframe().f_code.co_name)
         """
         Get table comment from the information schema.
 
@@ -456,6 +474,7 @@ class Prompt(ABC):
         return self.df_to_json(self.spark.sql(query))
 
     def get_table_metadata(self) -> Tuple[Dict[str, Dict[str, str]], str, str, str]:
+        print(sys._getframe().f_code.co_name)
         """
         Get table metadata including column tags, table tags, table constraints, and table comments.
 
@@ -470,6 +489,7 @@ class Prompt(ABC):
 
     @staticmethod
     def df_to_json(df: DataFrame) -> str:
+        print(sys._getframe().f_code.co_name)
         """
         Convert DataFrame to JSON string.
 
@@ -496,6 +516,7 @@ class CommentPrompt(Prompt):
     """
 
     def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         pandas_df = self.df.toPandas()
         if self.config.limit_prompt_based_on_cell_len:
             truncated_pandas_df = self.calculate_cell_length(pandas_df)
@@ -507,6 +528,7 @@ class CommentPrompt(Prompt):
         }
 
     def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Create a prompt template for generating metadata for tables and columns in Databricks.
 
@@ -568,6 +590,7 @@ class PIPrompt(Prompt):
     """
 
     def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         pandas_df = self.df.toPandas()
         if self.config.limit_prompt_based_on_cell_len:
             truncated_pandas_df = self.calculate_cell_length(pandas_df)
@@ -579,6 +602,7 @@ class PIPrompt(Prompt):
         }
 
     def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Create a prompt template for generating metadata for tables and columns in Databricks.
 
@@ -700,6 +724,7 @@ class CommentNoDataPrompt(Prompt):
     """
 
     def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Convert DataFrame to a dictionary format suitable for comment input.
 
@@ -717,6 +742,7 @@ class CommentNoDataPrompt(Prompt):
         }
 
     def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Create a prompt template for generating metadata for tables and columns in Databricks.
 
@@ -779,6 +805,7 @@ class DomainPrompt(Prompt):
     """
 
     def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Convert DataFrame to a dictionary format for domain classification.
         Includes table name, column names, and sample data.
@@ -794,6 +821,7 @@ class DomainPrompt(Prompt):
         }
 
     def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Create prompt template for domain classification.
         This is used to prepare data for the agent, not as a chat template.
@@ -809,6 +837,7 @@ class PromptFactory:
 
     @staticmethod
     def create_prompt(config, df, full_table_name) -> Prompt:
+        print(sys._getframe().f_code.co_name)
         """
         Create a prompt based on the configuration.
 
