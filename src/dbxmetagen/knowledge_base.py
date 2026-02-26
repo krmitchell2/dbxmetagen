@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any, List
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +26,17 @@ class KnowledgeBaseConfig:
     
     @property
     def fully_qualified_source(self) -> str:
+        print(sys._getframe().f_code.co_name)
         return f"{self.catalog_name}.{self.schema_name}.{self.source_table}"
     
     @property
     def fully_qualified_target(self) -> str:
+        print(sys._getframe().f_code.co_name)
         return f"{self.catalog_name}.{self.schema_name}.{self.target_table}"
 
 
 def parse_table_name_parts(table_name: str) -> Dict[str, Optional[str]]:
+    print(sys._getframe().f_code.co_name)
     """
     Parse a fully qualified table name into catalog, schema, and table parts.
     
@@ -55,6 +59,7 @@ def parse_table_name_parts(table_name: str) -> Dict[str, Optional[str]]:
 
 
 def classify_has_pii(classification: Optional[str]) -> bool:
+    print(sys._getframe().f_code.co_name)
     """
     Determine if a classification indicates PII presence.
     
@@ -70,6 +75,7 @@ def classify_has_pii(classification: Optional[str]) -> bool:
 
 
 def classify_has_phi(classification: Optional[str]) -> bool:
+    print(sys._getframe().f_code.co_name)
     """
     Determine if a classification indicates PHI presence.
     
@@ -92,6 +98,7 @@ class KnowledgeBaseBuilder:
     """
     
     def __init__(self, spark: SparkSession, config: KnowledgeBaseConfig):
+        print(sys._getframe().f_code.co_name)
         """
         Initialize the knowledge base builder.
         
@@ -103,6 +110,7 @@ class KnowledgeBaseBuilder:
         self.config = config
     
     def create_target_table(self) -> None:
+        print(sys._getframe().f_code.co_name)
         """Create the target table if it doesn't exist."""
         # Note: `schema` is a reserved word in SQL, must be escaped with backticks
         ddl = f"""
@@ -126,6 +134,7 @@ class KnowledgeBaseBuilder:
         logger.info(f"Target table {self.config.fully_qualified_target} ready")
     
     def read_source_data(self) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Read and filter source data from metadata_generation_log.
         
@@ -150,6 +159,7 @@ class KnowledgeBaseBuilder:
         return df
     
     def extract_table_comments(self, source_df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Extract table-level comments, keeping most recent per table.
         
@@ -176,6 +186,7 @@ class KnowledgeBaseBuilder:
         )
     
     def extract_domain_data(self, source_df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Extract domain classification, keeping most recent per table.
         
@@ -203,6 +214,7 @@ class KnowledgeBaseBuilder:
         )
     
     def extract_pi_data(self, source_df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Aggregate PI classifications at table level.
         
@@ -236,6 +248,7 @@ class KnowledgeBaseBuilder:
         )
     
     def get_all_tables_with_timestamps(self, source_df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Get all distinct tables with their first and last seen timestamps.
         
@@ -255,6 +268,7 @@ class KnowledgeBaseBuilder:
         )
     
     def build_staged_updates(self) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
         """
         Build the staged updates DataFrame by joining all metadata types.
         
@@ -316,6 +330,7 @@ class KnowledgeBaseBuilder:
         )
     
     def merge_to_target(self, staged_df: DataFrame) -> Dict[str, int]:
+        print(sys._getframe().f_code.co_name)
         """
         Merge staged updates into the target table.
         
@@ -369,6 +384,7 @@ class KnowledgeBaseBuilder:
         return {"total_records": count}
     
     def run(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         """
         Execute the full ETL pipeline.
         
@@ -401,6 +417,7 @@ def build_knowledge_base(
     catalog_name: str,
     schema_name: str
 ) -> Dict[str, Any]:
+    print(sys._getframe().f_code.co_name)
     """
     Convenience function to build the knowledge base.
     
