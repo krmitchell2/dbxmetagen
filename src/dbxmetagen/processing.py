@@ -94,7 +94,6 @@ logging.getLogger("pyspark.sql.connect.client.logging").setLevel(logging.CRITICA
 
 def extract_concise_error(error: Exception) -> str:
     print(sys._getframe().f_code.co_name)
-
     """
     Extract a concise error message from an exception, removing JVM stacktraces.
     For tag policy violations, extracts just the relevant tag information.
@@ -126,7 +125,6 @@ class DDLGenerator(ABC):
 
     def __init__(self):
         print(sys._getframe().f_code.co_name)
-
         pass
 
 
@@ -141,7 +139,6 @@ class Input(BaseModel):
     @classmethod
     def from_df(cls, df: DataFrame) -> Dict[str, Any]:
         print(sys._getframe().f_code.co_name)
-
         """From DataFrame class."""
         return {
             "table_name": f"{catalog_name}.{schema_name}.{table_name}",
@@ -151,7 +148,6 @@ class Input(BaseModel):
 
 def tag_table(table_name: str, tags: Dict[str, str]) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Tags a table with the provided tags.
 
@@ -166,7 +162,6 @@ def tag_table(table_name: str, tags: Dict[str, str]) -> None:
 
 def write_to_log_table(log_data: Dict[str, Any], log_table_name: str) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Writes log data to a specified log table.
 
@@ -193,7 +188,6 @@ def write_to_log_table(log_data: Dict[str, Any], log_table_name: str) -> None:
 
 def count_df_columns(df: DataFrame) -> int:
     print(sys._getframe().f_code.co_name)
-
     """
     Count the number of columns in a spark dataframe and return.
     """
@@ -202,7 +196,6 @@ def count_df_columns(df: DataFrame) -> int:
 
 def chunk_df(df: DataFrame, columns_per_call: int = 5) -> List[DataFrame]:
     print(sys._getframe().f_code.co_name)
-
     """
     Splits a DataFrame into multiple DataFrames, each containing a specified number of columns.
 
@@ -228,7 +221,6 @@ def chunk_df(df: DataFrame, columns_per_call: int = 5) -> List[DataFrame]:
 
 def get_extended_metadata_for_column(config, table_name, column_name):
     print(sys._getframe().f_code.co_name)
-
     """Get extended metadata for a column."""
     spark = SparkSession.builder.getOrCreate()
     query = f"""DESCRIBE EXTENDED {config.catalog_name}.{config.schema_name}.{table_name} `{column_name}`;"""
@@ -237,7 +229,6 @@ def get_extended_metadata_for_column(config, table_name, column_name):
 
 def get_column_types_from_describe(spark: SparkSession, full_table_name: str) -> dict:
     print(sys._getframe().f_code.co_name)
-
     """
     Get column names and types using DESCRIBE TABLE.
     This works even when df.schema fails (e.g., VARIANT type in Spark Connect).
@@ -578,7 +569,6 @@ def append_column_rows(
 
 def define_row_schema(config):
     print(sys._getframe().f_code.co_name)
-
     """
     Defines the schema for the row DataFrame.
 
@@ -634,7 +624,6 @@ def define_row_schema(config):
 
 def rows_to_df(rows: List[Row], config: MetadataConfig) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Converts a list of rows to a Spark DataFrame.
 
@@ -675,7 +664,6 @@ def rows_to_df(rows: List[Row], config: MetadataConfig) -> DataFrame:
 
 def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Adds a DDL statement to a DataFrame for column comment.
 
@@ -707,7 +695,6 @@ def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
 
 def add_ddl_to_table_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Adds a DDL statement to a DataFrame for table comment.
 
@@ -742,7 +729,6 @@ def add_ddl_to_table_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
 
 def add_table_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Adds a DDL statement to a DataFrame for PI information.
 
@@ -767,7 +753,6 @@ def add_table_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame:
 
 def add_column_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Adds a DDL statement to a DataFrame for PI information.
 
@@ -837,7 +822,6 @@ class DataFrameToExcelError(Exception):
 
 def ensure_directory_exists(directory_path: str) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Ensures that the specified directory exists, creating it if necessary.
 
@@ -928,7 +912,6 @@ def df_column_to_excel_file(
 
 def populate_log_table(df, config, current_user, base_path):
     print(sys._getframe().f_code.co_name)
-
     """
     Populates the log table with the necessary columns.
 
@@ -971,7 +954,6 @@ def populate_log_table(df, config, current_user, base_path):
 
 def get_control_table(config: MetadataConfig) -> str:
     print(sys._getframe().f_code.co_name)
-
     """
     Returns the control table name based on the provided configuration.
 
@@ -992,7 +974,6 @@ def get_control_table(config: MetadataConfig) -> str:
 
 def mark_as_deleted(table_name: str, config: MetadataConfig) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Updates the _deleted_at, _updated_at, and _status columns for the specified table.
     Also clears _claimed_by to release the claim.
@@ -1020,7 +1001,6 @@ def mark_as_deleted(table_name: str, config: MetadataConfig) -> None:
 
 def claim_table(table_name: str, config: MetadataConfig, max_retries: int = 3) -> bool:
     print(sys._getframe().f_code.co_name)
-
     """
     Atomically claim a table for processing in concurrent task scenarios.
     
@@ -1117,7 +1097,6 @@ def claim_table(table_name: str, config: MetadataConfig, max_retries: int = 3) -
 
 def mark_table_completed(table_name: str, config: MetadataConfig) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Mark a table as completed in the control table.
     
@@ -1145,7 +1124,6 @@ def mark_table_completed(table_name: str, config: MetadataConfig) -> None:
 
 def mark_table_failed(table_name: str, config: MetadataConfig, error_message: str = None) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Mark a table as failed in the control table.
     
@@ -1177,7 +1155,6 @@ def mark_table_failed(table_name: str, config: MetadataConfig, error_message: st
 
 def run_log_table_ddl(config):
     print(sys._getframe().f_code.co_name)
-
     """Run the unified log table DDL."""
     spark = SparkSession.builder.getOrCreate()
     spark.sql(
@@ -1216,7 +1193,6 @@ def run_log_table_ddl(config):
 
 def output_df_pandas_to_tsv(df, output_file):
     print(sys._getframe().f_code.co_name)
-
     pandas_df = df.toPandas()
     write_header = not os.path.exists(output_file)
     pandas_df.to_csv(output_file, sep="\t", header=write_header, index=False, mode="a")
@@ -1224,7 +1200,6 @@ def output_df_pandas_to_tsv(df, output_file):
 
 def _export_table_to_tsv(df, config):
     print(sys._getframe().f_code.co_name)
-
     """
     Reads a table from Databricks, writes it as a TSV file to a volume, and drops the original table.
 
@@ -1336,7 +1311,6 @@ def _export_table_to_tsv(df, config):
 
 def eval_disable_medical_information_value(config: MetadataConfig) -> bool:
     print(sys._getframe().f_code.co_name)
-
     return (
         config.disable_medical_information_value == "true"
         or config.disable_medical_information_value
@@ -1350,7 +1324,6 @@ class ExportError(Exception):
 
 def create_folder_if_not_exists(path: str) -> None:
     print(sys._getframe().f_code.co_name)
-
     """Create directory if it doesn't exist. For Unity Catalog volumes, directories are created automatically."""
     try:
         if not os.path.exists(path):
@@ -1363,7 +1336,6 @@ def create_folder_if_not_exists(path: str) -> None:
 
 def export_df_to_excel(df: pd.DataFrame, output_file: str, export_folder: str) -> None:
     print(sys._getframe().f_code.co_name)
-
     try:
         local_path = f"/local_disk0/tmp/{output_file}"
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
@@ -1406,7 +1378,6 @@ def export_df_to_excel(df: pd.DataFrame, output_file: str, export_folder: str) -
 
 def _export_table_to_excel(df: Any, config: Any) -> str:
     print(sys._getframe().f_code.co_name)
-
     """
     Reads a table from Databricks, writes it as an Excel file to a volume, and drops the original table.
 
@@ -1489,7 +1460,6 @@ def log_metadata_generation(
 # TODO: Figure out where this is used and if it is needed
 def set_classification_to_null(df: DataFrame, config: MetadataConfig) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Set the classification to null.
     """
@@ -1500,7 +1470,6 @@ def set_classification_to_null(df: DataFrame, config: MetadataConfig) -> DataFra
 
 def set_protected_classification(df: DataFrame, config: MetadataConfig) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Set the classification to protected.
     """
@@ -1529,7 +1498,6 @@ def replace_medical_information_with_phi(
     Replace the medical information with phi.
     """
     print(sys._getframe().f_code.co_name)
-
     if not df:
         return None
 
@@ -1651,7 +1619,6 @@ def write_ddl_to_volume_spark_native(
 
 def write_ddl_to_volume(file_name, base_path, ddl_statements, output_format):
     print(sys._getframe().f_code.co_name)
-
     """Legacy function kept for backward compatibility"""
     try:
         create_folder_if_not_exists(base_path)
@@ -2078,7 +2045,6 @@ def get_generated_metadata_data_aware(
 
 def check_token_length_against_num_words(prompt: str, config: MetadataConfig):
     print(sys._getframe().f_code.co_name)
-
     """
     This function is not intended to catch every instance of overflowing token length, but to avoid significant overflow. Specifically, we compare the number of words in the prompt to the maximum number of tokens allowed in the model. If the number of words exceeds the maximum, an error is raised. This is potentially quite a conservative metric.
     """
@@ -2140,7 +2106,6 @@ def review_and_generate_metadata(
 
 def replace_catalog_name(config, full_table_name):
     print(sys._getframe().f_code.co_name)
-
     """
     Replaces __CATALOG_NAME__ in a string with the actual catalog name from a fully scoped table name.
 
@@ -2170,7 +2135,6 @@ def replace_catalog_name(config, full_table_name):
 
 def log_missing_governance_tags(error_msg: str, ddl_statement: str) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Log the missing governance tags.
     """
@@ -2206,7 +2170,6 @@ def log_missing_governance_tags(error_msg: str, ddl_statement: str) -> None:
 
 def apply_comment_ddl(df: DataFrame, config: MetadataConfig) -> dict:
     print(sys._getframe().f_code.co_name)
-
     """
     Applies the comment DDL statements stored in the DataFrame to the table.
 
@@ -2274,7 +2237,6 @@ def apply_comment_ddl(df: DataFrame, config: MetadataConfig) -> dict:
 
 def split_and_hardcode_df(df, config):
     print(sys._getframe().f_code.co_name)
-
     """
     Splits the DataFrame and hardcodes the classification.
 
@@ -2295,7 +2257,6 @@ def split_and_hardcode_df(df, config):
 
 def process_and_add_ddl(config: MetadataConfig, table_name: str) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Processes the metadata, splits the DataFrame based on 'table' values,
     applies DDL functions, and returns a unioned DataFrame.
@@ -2325,7 +2286,6 @@ def process_and_add_ddl(config: MetadataConfig, table_name: str) -> DataFrame:
 
 def hardcode_classification(df, config):
     print(sys._getframe().f_code.co_name)
-
     """
     Hardcodes the classification for the DataFrame.
 
@@ -2343,7 +2303,6 @@ def hardcode_classification(df, config):
 
 def split_name_for_df(df):
     print(sys._getframe().f_code.co_name)
-
     """
     Splits the fully scoped table name for the DataFrame.
 
@@ -2376,7 +2335,6 @@ def split_name_for_df(df):
 
 def add_ddl_to_dfs(config, table_df, column_df, table_name):
     print(sys._getframe().f_code.co_name)
-
     """
     Adds DDL to the DataFrames.
 
@@ -2496,7 +2454,6 @@ def apply_ddl_to_tables(dfs, config):
         dict: Summary of DDL application results
     """
     print(sys._getframe().f_code.co_name)
-
     table_df = dfs.get(f"{config.mode}_table_df")
     column_df = dfs.get(f"{config.mode}_column_df")
 
@@ -2521,7 +2478,6 @@ def apply_ddl_to_tables(dfs, config):
 
 def print_ddl_summary(results, config):
     print(sys._getframe().f_code.co_name)
-
     """
     Prints a formatted summary of DDL application results.
 
@@ -2664,7 +2620,6 @@ def create_pi_table_df(
 
 def determine_table_classification(pi_rows: DataFrame) -> str:
     print(sys._getframe().f_code.co_name)
-
     """
     Determines the classification based on the values in the 'classification' column of the pi_rows DataFrame.
 
@@ -2707,7 +2662,6 @@ def determine_table_classification(pi_rows: DataFrame) -> str:
 
 def get_protected_classification_for_table(table_classification: str) -> str:
     print(sys._getframe().f_code.co_name)
-
     """
     Determines the classification based on the values in the 'classification'
     column of the pi_rows DataFrame.
@@ -2723,7 +2677,6 @@ def get_protected_classification_for_table(table_classification: str) -> str:
 
 def summarize_table_content(table_df, config, table_name):
     print(sys._getframe().f_code.co_name)
-
     """Create a new completion class for this."""
     if table_df.count() > 1:
         summarizer = TableCommentSummarizer(config, table_df)
@@ -2743,7 +2696,6 @@ def summarize_table_content(table_df, config, table_name):
 
 def setup_ddl(config: MetadataConfig) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Creates a schema volume if it does not already exist.
 
@@ -2769,7 +2721,6 @@ def setup_ddl(config: MetadataConfig) -> None:
 
 def create_tables(config: MetadataConfig) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Creates a schema volume if it does not already exist.
 
@@ -2822,7 +2773,6 @@ def instantiate_metadata_objects(
 
 def trim_whitespace_from_df(df: DataFrame) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Trims whitespace from all string columns in the DataFrame.
 
@@ -2848,7 +2798,6 @@ class TableProcessingError(Exception):
 
 def generate_and_persist_metadata(config: Any) -> None:
     print(sys._getframe().f_code.co_name)
-
     """
     Generates and persists comments for tables based on the provided setup and model parameters.
     
@@ -2984,7 +2933,6 @@ def generate_and_persist_metadata(config: Any) -> None:
 
 def setup_queue(config: MetadataConfig) -> List[str]:
     print(sys._getframe().f_code.co_name)
-
     """
     Checks a control table for any records and returns a list of table names.
     If the queue table is empty, reads a CSV with table names based on the flag set in the config file.
@@ -3163,7 +3111,6 @@ def upsert_table_names_to_control_table(
 
 def load_table_names_from_csv(csv_file_path):
     print(sys._getframe().f_code.co_name)
-
     """Check if the CSV file exists and load table names."""
     if not csv_file_path or not os.path.exists(csv_file_path):
         print(
@@ -3194,7 +3141,6 @@ def load_table_names_from_csv(csv_file_path):
 
 def is_schema_wildcard(table_name: str) -> bool:
     print(sys._getframe().f_code.co_name)
-
     """
     Check if a table name is a schema wildcard pattern (catalog.schema.*).
 
@@ -3209,7 +3155,6 @@ def is_schema_wildcard(table_name: str) -> bool:
 
 def get_tables_in_schema(catalog_name: str, schema_name: str) -> List[str]:
     print(sys._getframe().f_code.co_name)
-
     """
     Get all table names in a given catalog and schema.
 
@@ -3245,7 +3190,6 @@ def get_tables_in_schema(catalog_name: str, schema_name: str) -> List[str]:
 
 def expand_schema_wildcards(table_names: List[str]) -> List[str]:
     print(sys._getframe().f_code.co_name)
-
     """
     Expand schema wildcard patterns in a list of table names.
 
@@ -3278,7 +3222,6 @@ def expand_schema_wildcards(table_names: List[str]) -> List[str]:
 
 def sanitize_string_list(string_list: List[str]):
     print(sys._getframe().f_code.co_name)
-
     """Sanitize a list of strings.
 
     Args:
@@ -3304,7 +3247,6 @@ def sanitize_string_list(string_list: List[str]):
 
 def split_fully_scoped_table_name(df: DataFrame, full_table_name_col: str) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-
     """
     Splits a fully scoped table name column into catalog, schema, and table columns.
 
@@ -3326,7 +3268,6 @@ def split_fully_scoped_table_name(df: DataFrame, full_table_name_col: str) -> Da
 
 def split_table_names(table_names: str) -> List[str]:
     print(sys._getframe().f_code.co_name)
-
     """Split a comma-separated string of table names into a list of table names.
 
     Args:
@@ -3355,7 +3296,6 @@ def replace_fully_scoped_table_column(df):
 
 def _create_table_comment_ddl_func():
     print(sys._getframe().f_code.co_name)
-
     def table_comment_ddl(full_table_name: str, comment: str) -> str:
         print(sys._getframe().f_code.co_name)
         if comment is not None:
@@ -3410,7 +3350,6 @@ def _create_table_pi_information_ddl_func(config: MetadataConfig):
         table_name: str, classification: str, pi_type: str
     ) -> str:
         print(sys._getframe().f_code.co_name)
-
         return f"ALTER TABLE {table_name} SET TAGS ('{pi_class_tag}' = '{classification}', '{pi_subclass_tag}' = '{pi_type}');"
 
     return table_pi_information_ddl
