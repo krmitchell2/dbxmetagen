@@ -5,16 +5,19 @@ from openai.types.chat.chat_completion import ChatCompletion
 from src.dbxmetagen.config import MetadataConfig
 from src.dbxmetagen.error_handling import exponential_backoff
 from src.dbxmetagen.chat_client import ChatClientFactory
+import sys
 
 
 class TableCommentSummarizer:
     def __init__(self, config, df):
+        print(sys._getframe().f_code.co_name)
         self.config = config
         self.df = df
         self.chat_client = ChatClientFactory.create_client(config)
 
     @staticmethod
     def _parse_table_comment_input(df):
+        print(sys._getframe().f_code.co_name)
         return df.toPandas().to_dict(orient="records")
 
     def _get_chat_completion(
@@ -27,6 +30,7 @@ class TableCommentSummarizer:
         retries: int = 0,
         max_retries: int = 2,
     ) -> ChatCompletion:
+        print(sys._getframe().f_code.co_name)
         try:
             return self.chat_client.create_completion(
                 messages=prompt_content,
@@ -52,6 +56,7 @@ class TableCommentSummarizer:
                 raise e
 
     def _parse_response(self, response: str) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         try:
             response_dict = json.loads(response)
             if not isinstance(response_dict, dict):
@@ -61,6 +66,7 @@ class TableCommentSummarizer:
             raise ValueError(f"JSON decode error: {e}")
 
     def summarize_comments(self, table_name: str) -> str:
+        print(sys._getframe().f_code.co_name)
         table_df = self.df.filter(self.df["table"] == table_name)
 
         # Limit to first 25 columns to keep prompt size reasonable
