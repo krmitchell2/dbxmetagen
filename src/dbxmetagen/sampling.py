@@ -1,6 +1,8 @@
+import sys
 
 
 def determine_sampling_ratio(nrows: int, sample_size: int) -> float:
+    print(sys._getframe().f_code.co_name)
     """
     Takes a number of rows and a ratio, and returns the number of rows to sample.
 
