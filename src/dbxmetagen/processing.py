@@ -771,7 +771,6 @@ def add_column_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame
 
 
 def df_to_sql_file(
-
     df: DataFrame,
     catalog_name: str,
     dest_schema_name: str,
@@ -834,7 +833,6 @@ def ensure_directory_exists(directory_path: str) -> None:
 
 
 def df_column_to_excel_file(
-
     df: pd.DataFrame, filename: str, base_path: str, excel_column: str
 ) -> str:
     print(sys._getframe().f_code.co_name)
@@ -1430,7 +1428,6 @@ def _export_table_to_excel(df: Any, config: Any) -> str:
 
 
 def log_metadata_generation(
-
     df: DataFrame, config: MetadataConfig, table_name: str, volume_name: str
 ) -> None:
     print(sys._getframe().f_code.co_name)
@@ -1482,7 +1479,6 @@ def set_protected_classification(df: DataFrame, config: MetadataConfig) -> DataF
 
 
 def replace_medical_information_with_phi(
-
     df: DataFrame, config: MetadataConfig
 ) -> DataFrame:
     """
@@ -1503,7 +1499,6 @@ def replace_medical_information_with_phi(
 
 
 def filter_and_write_ddl(
-
     df: DataFrame,
     config: MetadataConfig,
     base_path: str,
@@ -1557,7 +1552,6 @@ def filter_and_write_ddl(
 
 
 def write_ddl_to_volume_spark_native(
-
     df: DataFrame, file_name: str, base_path: str, output_format: str
 ):
     print(sys._getframe().f_code.co_name)
@@ -1631,7 +1625,6 @@ def write_ddl_to_volume(file_name, base_path, ddl_statements, output_format):
 
 
 def create_and_persist_ddl(
-
     df: DataFrame, config: MetadataConfig, table_name: str
 ) -> None:
     print(sys._getframe().f_code.co_name)
@@ -1873,7 +1866,6 @@ def create_and_persist_ddl(
 
 # TODO: Update this to use get_generated_metadata_data_unaware() if sample size is 0 so Presidio can still use data.
 def get_domain_classification(
-
     config: MetadataConfig, full_table_name: str
 ) -> Dict[str, Any]:
     print(sys._getframe().f_code.co_name)
@@ -1949,8 +1941,7 @@ def get_domain_classification(
     return classification_result
 
 
-def get_generated_metadata(
-
+def get_generated_metadata(\
     config: MetadataConfig, full_table_name: str
 ) -> List[Tuple[PIResponse, CommentResponse]]:
     print(sys._getframe().f_code.co_name)
@@ -1989,7 +1980,6 @@ def get_generated_metadata(
 
 
 def get_generated_metadata_data_aware(
-
     spark: SparkSession, config: MetadataConfig, full_table_name: str
 ):
     print(sys._getframe().f_code.co_name)
@@ -2043,7 +2033,6 @@ def check_token_length_against_num_words(prompt: str, config: MetadataConfig):
 
 
 def review_and_generate_metadata(
-
     config: MetadataConfig, full_table_name: str
 ) -> Tuple[DataFrame, DataFrame]:
     print(sys._getframe().f_code.co_name)
@@ -2385,7 +2374,6 @@ def add_ddl_to_dfs(config, table_df, column_df, table_name):
 
 
 def add_ddl_to_domain_table_df(
-
     table_df: DataFrame, ddl_col_name: str, config
 ) -> DataFrame:
     print(sys._getframe().f_code.co_name)
@@ -2425,7 +2413,6 @@ def add_ddl_to_domain_table_df(
 
 
 def apply_ddl_to_tables(dfs, config):
-
     """
     Applies DDL to the tables.
 
@@ -2534,7 +2521,6 @@ def print_ddl_summary(results, config):
 
 
 def create_pi_table_df(
-
     column_df: DataFrame, table_name: str, config: MetadataConfig
 ) -> DataFrame:
     print(sys._getframe().f_code.co_name)
@@ -2732,7 +2718,6 @@ def create_tables(config: MetadataConfig) -> None:
 
 
 def instantiate_metadata_objects(
-
     env, mode, catalog_name=None, schema_name=None, table_names=None, base_url=None
 ):
     print(sys._getframe().f_code.co_name)
@@ -2985,7 +2970,6 @@ def setup_queue(config: MetadataConfig) -> List[str]:
 
 
 def ensure_fully_scoped_table_names(
-
     table_names: List[str], default_catalog: str
 ) -> List[str]:
     print(sys._getframe().f_code.co_name)
@@ -3012,7 +2996,6 @@ def ensure_fully_scoped_table_names(
 
 
 def upsert_table_names_to_control_table(
-
     table_names: List[str], config: MetadataConfig, max_retries: int = 3
 ) -> None:
     print(sys._getframe().f_code.co_name)
@@ -3275,6 +3258,7 @@ def replace_fully_scoped_table_column(df):
 
 def _create_table_comment_ddl_func():
     print(sys._getframe().f_code.co_name)
+
     def table_comment_ddl(full_table_name: str, comment: str) -> str:
         print(sys._getframe().f_code.co_name)
         if comment is not None:
