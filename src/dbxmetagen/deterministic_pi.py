@@ -16,25 +16,25 @@ from src.dbxmetagen.user_utils import sanitize_user_identifier
 import sys
 
 
-def luhn_checksum(card_number):
-    print(sys._getframe().f_code.co_name)
-    """Check if a card number is valid using the Luhn algorithm."""
-    card_number = str(card_number).replace(" ", "").replace("-", "")
-    if not card_number.isdigit():
-        return False
-    if len(card_number) < 13 or len(card_number) > 19:
-        return False
-    sum_ = 0
-    alt = False
-    for digit in reversed(card_number):
-        d = int(digit)
-        if alt:
-            d = d * 2
-            if d > 9:
-                d -= 9
-        sum_ += d
-        alt = not alt
-    return sum_ % 10 == 0
+# def luhn_checksum(card_number):
+#     print(sys._getframe().f_code.co_name)
+#     """Check if a card number is valid using the Luhn algorithm."""
+#     card_number = str(card_number).replace(" ", "").replace("-", "")
+#     if not card_number.isdigit():
+#         return False
+#     if len(card_number) < 13 or len(card_number) > 19:
+#         return False
+#     sum_ = 0
+#     alt = False
+#     for digit in reversed(card_number):
+#         d = int(digit)
+#         if alt:
+#             d = d * 2
+#             if d > 9:
+#                 d -= 9
+#         sum_ += d
+#         alt = not alt
+#     return sum_ % 10 == 0
 
 
 def get_analyzer_engine(add_pci: bool = True, add_phi: bool = True) -> AnalyzerEngine:
