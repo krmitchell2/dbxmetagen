@@ -22,9 +22,7 @@ import sys
 
 
 def get_dbr_version():
-    print(sys._getframe().f_code.co_name)
-
-    
+    print(sys._getframe().f_code.co_name)    
     """Get Databricks Runtime version from environment."""
     dbr_version = os.environ.get("DATABRICKS_RUNTIME_VERSION", None)
     if dbr_version:
@@ -36,8 +34,6 @@ def get_dbr_version():
 
 def validate_runtime_compatibility(dbr_version, config):
     print(sys._getframe().f_code.co_name)
-
-    
     """Validate runtime compatibility with output formats."""
     if "client" in dbr_version and "excel" in (
         config.ddl_output_format,
@@ -59,8 +55,6 @@ def validate_runtime_compatibility(dbr_version, config):
 
 def setup_mode_dependencies(config):
     print(sys._getframe().f_code.co_name)
-
-    
     """Setup mode-specific dependencies and validate configurations."""
     if config.mode == "pi":
         if config.include_deterministic_pi or config.include_deterministic_pi == "true":
@@ -81,9 +75,7 @@ def setup_mode_dependencies(config):
 
 
 def setup_environment(config):
-    print(sys._getframe().f_code.co_name)
-
-    
+    print(sys._getframe().f_code.co_name)    
     """Setup Databricks environment variables."""
     if not os.environ.get("DATABRICKS_HOST") and config.base_url:
         os.environ["DATABRICKS_HOST"] = config.base_url
@@ -91,8 +83,6 @@ def setup_environment(config):
 
 def initialize_infrastructure(config):
     print(sys._getframe().f_code.co_name)
-
-    
     """Initialize DDL directories, tables, and queue."""
     setup_ddl(config)
     create_tables(config)
@@ -104,8 +94,6 @@ def initialize_infrastructure(config):
 
 def _grant_permissions_to_groups(config, catalog_name, schema_name, volume_name):
     print(sys._getframe().f_code.co_name)
-
-    
     """Grant permissions to groups specified in config."""
     if not hasattr(config, "permission_groups") or not config.permission_groups:
         return False
@@ -130,8 +118,6 @@ def _grant_permissions_to_groups(config, catalog_name, schema_name, volume_name)
 
 def _grant_permissions_to_users(config, catalog_name, schema_name, volume_name):
     print(sys._getframe().f_code.co_name)
-
-    
     """Grant permissions to additional users specified in config."""
     if not hasattr(config, "permission_users") or not config.permission_users:
         return False
@@ -156,8 +142,6 @@ def _grant_permissions_to_users(config, catalog_name, schema_name, volume_name):
 
 def grant_permissions_on_created_objects(config):
     print(sys._getframe().f_code.co_name)
-
-    
     """Grant permissions to groups and users specified in config.
 
     This function attempts to grant permissions but failures are non-fatal.
@@ -230,8 +214,6 @@ def grant_permissions_on_created_objects(config):
 
 def cleanup_resources(config, spark):
     print(sys._getframe().f_code.co_name)
-
-    
     """Cleanup temporary tables and control tables."""
     temp_table = config.get_temp_metadata_log_table_name()
     control_table = get_control_table(config)
@@ -294,7 +276,6 @@ def cleanup_resources(config, spark):
 
 def main(kwargs):
     print(sys._getframe().f_code.co_name)
-
     """Main function to generate metadata."""
     # Initialize Spark and get runtime info
     spark = SparkSession.builder.getOrCreate()
