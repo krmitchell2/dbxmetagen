@@ -4,15 +4,18 @@ import re
 from typing import Optional
 from deprecated import deprecated
 from src.dbxmetagen.user_utils import sanitize_user_identifier
+import sys
 
 
 @deprecated("Use sanitize_user_identifier from processing module instead.")
 def sanitize_email(email: str) -> str:
+    print(sys._getframe().f_code.co_name)
     """Use sanitize_user_identifier from processing module instead."""
     return sanitize_user_identifier(email)
 
 
 def cleanse_sql_comment(comment: str) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Cleanse a SQL comment string to make it compatible with DB SQL.
 
