@@ -1,10 +1,10 @@
-# from functools import reduce
-# import pandas as pd
-# from pyspark.sql import DataFrame, SparkSession
-# from pyspark.sql.functions import col, lit, when
-# from pyspark.sql.column import Column
-# from typing import List, Dict
-# from src.dbxmetagen.config import MetadataConfig
+from functools import reduce
+import pandas as pd
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.functions import col, lit, when
+from pyspark.sql.column import Column
+from typing import List, Dict
+from src.dbxmetagen.config import MetadataConfig
 
 
 # def override_metadata_from_csv(
@@ -262,70 +262,70 @@
 #     return df
 
 
-# def build_condition(df, table, column, schema, catalog):
-#     """
-#     Builds the condition for the DataFrame filtering.
+def build_condition(df, table, column, schema, catalog):
+    """
+    Builds the condition for the DataFrame filtering.
 
-#     Supported parameter combinations:
-#     1. Only column name is provided (all other parameters are None or empty)
-#     2. All parameters (catalog, schema, table, column) are provided
-#     3. Table-level: (catalog, schema, table) provided, column is None (for domain mode)
+    Supported parameter combinations:
+    1. Only column name is provided (all other parameters are None or empty)
+    2. All parameters (catalog, schema, table, column) are provided
+    3. Table-level: (catalog, schema, table) provided, column is None (for domain mode)
 
-#     Args:
-#         df (DataFrame): The input DataFrame.
-#         table (str): The table name.
-#         column (str): The column name (can be None for table-level conditions).
-#         schema (str): The schema name.
-#         catalog (str): The catalog name.
+    Args:
+        df (DataFrame): The input DataFrame.
+        table (str): The table name.
+        column (str): The column name (can be None for table-level conditions).
+        schema (str): The schema name.
+        catalog (str): The catalog name.
 
-#     Returns:
-#         Column: The condition column.
+    Returns:
+        Column: The condition column.
 
-#     Raises:
-#         ValueError: If the combination of inputs is not one of the supported patterns.
-#     """
-#     table = table if table else None
-#     schema = schema if schema else None
-#     catalog = catalog if catalog else None
+    Raises:
+        ValueError: If the combination of inputs is not one of the supported patterns.
+    """
+    table = table if table else None
+    schema = schema if schema else None
+    catalog = catalog if catalog else None
 
-#     # Pattern 1: Only column name (column-level override across all tables)
-#     only_column = column and not any([table, schema, catalog])
+    # Pattern 1: Only column name (column-level override across all tables)
+    only_column = column and not any([table, schema, catalog])
 
-#     # Pattern 2: All params including column (specific column in specific table)
-#     all_params = all([column, table, schema, catalog])
+    # Pattern 2: All params including column (specific column in specific table)
+    all_params = all([column, table, schema, catalog])
 
-#     # Pattern 3: Table-level (no column, for domain mode)
-#     table_level = all([table, schema, catalog]) and not column
+    # Pattern 3: Table-level (no column, for domain mode)
+    table_level = all([table, schema, catalog]) and not column
 
-#     if only_column:
-#         return col("column_name") == column
-#     elif all_params:
-#         return reduce(
-#             lambda x, y: x & y,
-#             [
-#                 col("column_name") == column,
-#                 col("table_name") == table,
-#                 col("schema") == schema,
-#                 col("catalog") == catalog,
-#             ],
-#         )
-#     elif table_level:
-#         # Table-level condition (for domain mode)
-#         return reduce(
-#             lambda x, y: x & y,
-#             [
-#                 col("table_name") == table,
-#                 col("schema") == schema,
-#                 col("catalog") == catalog,
-#             ],
-#         )
-#     else:
-#         raise ValueError(
-#             "Unsupported parameter combination. Supported patterns:\n"
-#             "1. Only column name (column-level override across all tables)\n"
-#             "2. All parameters (catalog, schema, table, column)\n"
-#             "3. Table-level (catalog, schema, table) with column=None"
-#         )
+    if only_column:
+        return col("column_name") == column
+    elif all_params:
+        return reduce(
+            lambda x, y: x & y,
+            [
+                col("column_name") == column,
+                col("table_name") == table,
+                col("schema") == schema,
+                col("catalog") == catalog,
+            ],
+        )
+    elif table_level:
+        # Table-level condition (for domain mode)
+        return reduce(
+            lambda x, y: x & y,
+            [
+                col("table_name") == table,
+                col("schema") == schema,
+                col("catalog") == catalog,
+            ],
+        )
+    else:
+        raise ValueError(
+            "Unsupported parameter combination. Supported patterns:\n"
+            "1. Only column name (column-level override across all tables)\n"
+            "2. All parameters (catalog, schema, table, column)\n"
+            "3. Table-level (catalog, schema, table) with column=None"
+        )
 
 
 # def get_join_conditions(df: DataFrame, csv_spark_df: DataFrame) -> List[Column]:
