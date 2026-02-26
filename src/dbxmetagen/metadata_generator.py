@@ -6,7 +6,7 @@ from typing import Tuple, Dict, List, Any, Union, Optional
 from openai.types.chat.chat_completion import ChatCompletion
 from pydantic import BaseModel, ConfigDict, field_validator
 from src.dbxmetagen.config import MetadataConfig
-from src.dbxmetagen.error_handling import exponential_backoff
+# from src.dbxmetagen.error_handling import exponential_backoff
 from src.dbxmetagen.chat_client import ChatClientFactory
 import sys
 
