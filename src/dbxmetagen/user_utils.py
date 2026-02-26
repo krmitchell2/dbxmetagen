@@ -56,10 +56,10 @@ def sanitize_user_identifier(identifier: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_]", "_", identifier)
 
 
-# def sanitize_email(email: str) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     DEPRECATED: Use sanitize_user_identifier instead.
-#     Backward compatibility wrapper for sanitize_user_identifier.
-#     """
-#     return sanitize_user_identifier(email)
+def sanitize_email(email: str) -> str:
+    print(sys._getframe().f_code.co_name)
+    """
+    DEPRECATED: Use sanitize_user_identifier instead.
+    Backward compatibility wrapper for sanitize_user_identifier.
+    """
+    return sanitize_user_identifier(email)

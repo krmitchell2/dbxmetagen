@@ -166,4 +166,4 @@ docs/*
 docs/operations/*/
 #!docs/operations/README.md
 
-logs/
+/logs

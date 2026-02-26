@@ -144,48 +144,48 @@ class Prompt(ABC):
             & ~df["info_name"].isin([pi_classification_tag, pi_subclassification_tag])
         )
 
-#     def _filter_domain_mode(self, df: DataFrame) -> DataFrame:
-#         print(sys._getframe().f_code.co_name)
-#         """Filter metadata for domain mode (remove NULL values and existing domain tags to avoid bias)"""
-#         # Get configured tag names (with defaults)
-#         domain_tag = getattr(self.config, "domain_tag_name", "domain")
-#         subdomain_tag = getattr(self.config, "subdomain_tag_name", "subdomain")
+    def _filter_domain_mode(self, df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
+        """Filter metadata for domain mode (remove NULL values and existing domain tags to avoid bias)"""
+        # Get configured tag names (with defaults)
+        domain_tag = getattr(self.config, "domain_tag_name", "domain")
+        subdomain_tag = getattr(self.config, "subdomain_tag_name", "subdomain")
 
-#         return df.filter(
-#             (df["info_value"] != "NULL")
-#             & ~df["info_name"].isin([domain_tag, subdomain_tag])
-#         )
+        return df.filter(
+            (df["info_value"] != "NULL")
+            & ~df["info_name"].isin([domain_tag, subdomain_tag])
+        )
 
-#     def _filter_comment_mode(self, df: DataFrame) -> DataFrame:
-#         print(sys._getframe().f_code.co_name)
-#         """Filter metadata for comment mode with additional exclusions"""
-#         # Get configured tag names (with defaults) to avoid bias
-#         pi_classification_tag = getattr(
-#             self.config, "pi_classification_tag_name", "data_classification"
-#         )
-#         pi_subclassification_tag = getattr(
-#             self.config, "pi_subclassification_tag_name", "data_subclassification"
-#         )
+    def _filter_comment_mode(self, df: DataFrame) -> DataFrame:
+        print(sys._getframe().f_code.co_name)
+        """Filter metadata for comment mode with additional exclusions"""
+        # Get configured tag names (with defaults) to avoid bias
+        pi_classification_tag = getattr(
+            self.config, "pi_classification_tag_name", "data_classification"
+        )
+        pi_subclassification_tag = getattr(
+            self.config, "pi_subclassification_tag_name", "data_subclassification"
+        )
 
-#         filtered_df = df.filter(
-#             (df["info_value"] != "NULL")
-#             & ~df["info_name"].isin(
-#                 [
-#                     "description",
-#                     "comment",
-#                     pi_classification_tag,
-#                     pi_subclassification_tag,
-#                 ]
-#             )
-#         )
+        filtered_df = df.filter(
+            (df["info_value"] != "NULL")
+            & ~df["info_name"].isin(
+                [
+                    "description",
+                    "comment",
+                    pi_classification_tag,
+                    pi_subclassification_tag,
+                ]
+            )
+        )
 
-#         if not self.config.include_datatype_from_metadata:
-#             filtered_df = filtered_df.filter(df["info_name"] != "data_type")
+        if not self.config.include_datatype_from_metadata:
+            filtered_df = filtered_df.filter(df["info_name"] != "data_type")
 
-#         if not self.config.include_possible_data_fields_in_metadata:
-#             filtered_df = filtered_df.filter(~df["info_name"].isin(["min", "max"]))
+        if not self.config.include_possible_data_fields_in_metadata:
+            filtered_df = filtered_df.filter(~df["info_name"].isin(["min", "max"]))
 
-#         return filtered_df
+        return filtered_df
 
     def add_metadata_to_comment_input(self) -> None:
         print(sys._getframe().f_code.co_name)
@@ -247,38 +247,38 @@ class Prompt(ABC):
 
         return column_metadata_dict
 
-#     def get_column_constraints(
-#         self, column_name: str, combined_metadata: Dict[str, str]
-#     ):
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Add column constraints to the column contents.
+    def get_column_constraints(
+        self, column_name: str, combined_metadata: Dict[str, str]
+    ):
+        print(sys._getframe().f_code.co_name)
+        """
+        Add column constraints to the column contents.
 
-#         Args:
-#             column_metadata (Tuple[Dict[str, str], str, str, str]): Tuple containing column constraints.
-#         """
-#         catalog_name, schema_name, table_name = self.full_table_name.split(".")
-#         query = f"""
-#         SELECT catalog_name, schema_name, table_name, column_name, tag_name, tag_value
-#         FROM system.information_schema.column_tags
-#         WHERE catalog_name = '{catalog_name}'
-#         AND schema_name = '{schema_name}'
-#         AND table_name = '{table_name}';
-#         """
-#         result_df = self.spark.sql(query)
-#         column_tags = (
-#             result_df.groupBy("column_name")
-#             .agg(collect_list(struct("tag_name", "tag_value")).alias("tags"))
-#             .collect()
-#         )
-#         column_tags_dict = {
-#             row["column_name"]: {
-#                 tag["tag_name"]: tag["tag_value"] for tag in row["tags"]
-#             }
-#             for row in column_tags
-#         }
-#         logger.debug("column tags dict: %s", column_tags_dict)
-#         return column_tags_dict
+        Args:
+            column_metadata (Tuple[Dict[str, str], str, str, str]): Tuple containing column constraints.
+        """
+        catalog_name, schema_name, table_name = self.full_table_name.split(".")
+        query = f"""
+        SELECT catalog_name, schema_name, table_name, column_name, tag_name, tag_value
+        FROM system.information_schema.column_tags
+        WHERE catalog_name = '{catalog_name}'
+        AND schema_name = '{schema_name}'
+        AND table_name = '{table_name}';
+        """
+        result_df = self.spark.sql(query)
+        column_tags = (
+            result_df.groupBy("column_name")
+            .agg(collect_list(struct("tag_name", "tag_value")).alias("tags"))
+            .collect()
+        )
+        column_tags_dict = {
+            row["column_name"]: {
+                tag["tag_name"]: tag["tag_value"] for tag in row["tags"]
+            }
+            for row in column_tags
+        }
+        logger.debug("column tags dict: %s", column_tags_dict)
+        return column_tags_dict
 
     def add_column_metadata_to_column_contents(
         self, column_name: str, combined_metadata: Dict[str, Any]
@@ -510,78 +510,78 @@ class Prompt(ABC):
         return json_response
 
 
-# class CommentPrompt(Prompt):
-#     """
-#     Prompt for generating metadata for tables and columns in Databricks.
-#     """
+class CommentPrompt(Prompt):
+    """
+    Prompt for generating metadata for tables and columns in Databricks.
+    """
 
-#     def convert_to_comment_input(self) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         pandas_df = self.df.toPandas()
-#         if self.config.limit_prompt_based_on_cell_len:
-#             truncated_pandas_df = self.calculate_cell_length(pandas_df)
-#         else:
-#             truncated_pandas_df = pandas_df
-#         return {
-#             "table_name": self.full_table_name,
-#             "column_contents": truncated_pandas_df.to_dict(orient="split"),
-#         }
+    def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        pandas_df = self.df.toPandas()
+        if self.config.limit_prompt_based_on_cell_len:
+            truncated_pandas_df = self.calculate_cell_length(pandas_df)
+        else:
+            truncated_pandas_df = pandas_df
+        return {
+            "table_name": self.full_table_name,
+            "column_contents": truncated_pandas_df.to_dict(orient="split"),
+        }
 
-#     def create_prompt_template(self) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Create a prompt template for generating metadata for tables and columns in Databricks.
+    def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        """
+        Create a prompt template for generating metadata for tables and columns in Databricks.
 
-#         Returns:
-#             Dict[str, Any]: Dictionary containing the prompt template.
-#         """
-#         logger.debug("Creating comment prompt template...")
-#         content = self.prompt_content
-#         acro_content = self.config.acro_content
-#         return {
-#             "comment": [
-#                 {
-#                     "role": "system",
-#                     "content": """Generate comprehensive metadata comments for Databricks tables and columns. Analyze all provided information (table name, column names, data samples, metadata statistics, acronyms) to create well-reasoned descriptions.
+        Returns:
+            Dict[str, Any]: Dictionary containing the prompt template.
+        """
+        logger.debug("Creating comment prompt template...")
+        content = self.prompt_content
+        acro_content = self.config.acro_content
+        return {
+            "comment": [
+                {
+                    "role": "system",
+                    "content": """Generate comprehensive metadata comments for Databricks tables and columns. Analyze all provided information (table name, column names, data samples, metadata statistics, acronyms) to create well-reasoned descriptions.
 
-#                     Response Format (MUST be valid JSON with arrays, not stringified arrays):
-#                     {"table": "description", "columns": ["col1", "col2"], "column_contents": ["col1 desc", "col2 desc"]}
+                    Response Format (MUST be valid JSON with arrays, not stringified arrays):
+                    {"table": "description", "columns": ["col1", "col2"], "column_contents": ["col1 desc", "col2 desc"]}
                     
-#                     IMPORTANT: column_contents must be a JSON array [...], NOT a string containing an array.
+                    IMPORTANT: column_contents must be a JSON array [...], NOT a string containing an array.
 
-#                     Guidelines:
-#                     1. Scale comment length with information richness: 3-5 sentences for simple columns, 4-8 sentences when rich metadata/patterns emerge
-#                     2. Synthesize insights from: column name -> table context -> sample data -> metadata statistics
-#                     3. Unpack acronyms confidently. Note anomalies (e.g., unexpectedly low distinct counts, suspicious nulls, data type mismatches)
-#                     4. Sample data may not represent full distribution - use metadata to validate/contradict sample observations
-#                     5. Use double quotes for strings. Escape apostrophes with '' (SQL style) for DDL compatibility
-#                     6. 'index' key is from Pandas to_dict() - ignore unless in 'columns' list
-#                     7. Return ONLY the JSON dictionary
-#                     8. Do not include example values in the comment if the values are PII.
-#                     """,
-#                 },
-#                 {
-#                     "role": "user",
-#                     "content": """Content is here - {"table_name": "retail.transactions.daily_sales", "column_contents": {"index": [0,1,2], "columns": ["transaction_id", "sale_amount", "is_refund"], "data": [["TXN001", "49.99", "false"], ["TXN002", "125.00", "false"], ["TXN003", "89.50", "false"]], "column_metadata": {"transaction_id": {"col_name": "transaction_id", "data_type": "string", "num_nulls": "0", "distinct_count": "50000", "avg_col_len": "6", "max_col_len": "6"}, "sale_amount": {"col_name": "sale_amount", "data_type": "decimal", "num_nulls": "0", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "8"}, "is_refund": {"col_name": "is_refund", "data_type": "string", "num_nulls": "0", "distinct_count": "2", "avg_col_len": "5", "max_col_len": "5"}}}} and abbreviations and acronyms are here - {}""",
-#                 },
-#                 {
-#                     "role": "assistant",
-#                     "content": """{"table": "Daily retail transaction records tracking individual sales and refunds. Located in the retail catalog under transactions schema, indicating transactional operational data.", "columns": ["transaction_id", "sale_amount", "is_refund"], "column_contents": ["Unique transaction identifier following 'TXN###' format. Sample shows sequential numbering (TXN001-003). No nulls with 50,000 distinct values indicating good uniqueness across full dataset.", "Sale amount in decimal format representing transaction total. Sample shows values ranging from $49.99 to $125.00 with two decimal precision. 15,000 distinct values suggests diverse pricing, no nulls indicates required field.", "Refund flag stored as string ('true'/'false') rather than boolean data type. Sample shows only 'false' values but metadata confirms 2 distinct values exist in full dataset. No nulls indicates system always populates this field, likely defaulting to 'false' for new transactions."]}""",
-#                 },
-#                 {
-#                     "role": "user",
-#                     "content": """Content is here - {"table_name": "healthcare.clinical.patient_lab_results", "column_contents": {"index": [0,1,2,3], "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "data": [["MRN-2024-8901", "2024-03-15", "GLUC", "105", "70", "100", "H", "Dr. Smith"], ["MRN-2024-8902", "2024-03-15", "HBA1C", "6.2", "4.0", "5.6", "H", "Dr. Johnson"], ["MRN-2024-8903", "2024-03-16", "CHOL", "185", "125", "200", "N", "Dr. Smith"], ["MRN-2024-8904", "2024-03-16", "GLUC", "92", "70", "100", "N", "Dr. Williams"]], "column_metadata": {"patient_mrn": {"col_name": "patient_mrn", "data_type": "string", "num_nulls": "0", "distinct_count": "8500", "avg_col_len": "14", "max_col_len": "14"}, "test_date": {"col_name": "test_date", "data_type": "date", "num_nulls": "0", "distinct_count": "365", "avg_col_len": "10", "max_col_len": "10"}, "test_code": {"col_name": "test_code", "data_type": "string", "num_nulls": "0", "distinct_count": "250", "avg_col_len": "5", "max_col_len": "8"}, "result_value": {"col_name": "result_value", "data_type": "string", "num_nulls": "12", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "20"}, "ref_range_low": {"col_name": "ref_range_low", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "ref_range_high": {"col_name": "ref_range_high", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "abnormal_flag": {"col_name": "abnormal_flag", "data_type": "string", "num_nulls": "0", "distinct_count": "4", "avg_col_len": "1", "max_col_len": "2"}, "ordering_physician": {"col_name": "ordering_physician", "data_type": "string", "num_nulls": "5", "distinct_count": "45", "avg_col_len": "12", "max_col_len": "30"}}}} and abbreviations and acronyms are here - {"MRN - Medical Record Number", "GLUC - Glucose", "HBA1C - Hemoglobin A1C", "CHOL - Cholesterol"}""",
-#                 },
-#                 {
-#                     "role": "assistant",
-#                     "content": """{"table": "Clinical laboratory test results for patients, combining patient identifiers with test metadata, results, and ordering physician information. Located in healthcare.clinical schema indicating protected health information requiring appropriate access controls. The table structure supports multiple test types per patient over time, with reference ranges for result interpretation.", "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "column_contents": ["Medical Record Number serving as the patient identifier. Consistent 14-character format with 8,500 distinct values across the dataset and no nulls, indicating strong data quality. The 'MRN-YYYY-####' format visible in samples suggests year-based record numbering.", "Date when the laboratory test was performed. Zero nulls with 365 distinct dates suggests approximately daily testing activity over a year. Consistent 10-character length indicates standard date format (YYYY-MM-DD). Sample shows clustering of tests on same dates, which is typical for batch processing of lab orders.", "Standardized laboratory test code identifier. Sample shows common codes (GLUC for Glucose, HBA1C for Hemoglobin A1C, CHOL for Cholesterol) with 250 distinct test types available. Variable length (5-8 characters) accommodates different coding standards. No nulls indicates required field for all lab orders.", "Numeric test result stored as string to accommodate diverse result formats across test types. High cardinality (15,000 distinct values) appropriate for continuous measurements. Notably contains 12 nulls which likely represent pending, cancelled, or failed tests - important for downstream processing to handle missing results. Variable length (max 20 characters) suggests accommodation of text qualifiers or complex results beyond simple numerics.", "Lower bound of the normal reference range for test interpretation. The 50 null values correlate with potential gaps where tests may not have established reference ranges or use alternative interpretation methods. 150 distinct values indicates reference ranges vary by test type and possibly by patient demographics (age, gender). Sample data shows values like 70 (glucose), 4.0 (HBA1C), 125 (cholesterol) providing context for result interpretation.", "Upper bound of the normal reference range. Mirrors the null pattern of 'ref_range_low' (50 nulls), confirming these are paired values that should be populated or null together. The sample data shows reference ranges contextualizing result values (e.g., glucose 105 vs range 70-100 flagged as high). Consistent character lengths with low bound suggests standardized numeric formatting.", "Result interpretation flag indicating whether the value falls outside normal parameters. Sample shows 'H' (High) and 'N' (Normal) with metadata indicating 4 distinct values total (likely H, L, N, and possibly Critical). Single-character format with max length 2 suggests occasional use of two-character codes. Zero nulls indicates this is a required calculated/derived field, essential for clinical decision support and alerts.", "Name of the physician who ordered the laboratory test. Contains 5 nulls (0.06% of records) suggesting some tests may be ordered by non-physician providers, through automated standing orders, or via clinical protocols. Low cardinality (45 distinct physicians for 8,500 patients) indicates a small practice, specialized facility, or limited provider network. Variable length (12-30 characters) accommodates different name formats and titles. The 'Dr.' prefix in samples suggests consistent title formatting, though full names create the length variability."]}""",
-#                 },
-#                 {
-#                     "role": "user",
-#                     "content": f"""Content is here - {content} and abbreviations are here - {acro_content}""",
-#                 },
-#             ]
-#         }
+                    Guidelines:
+                    1. Scale comment length with information richness: 3-5 sentences for simple columns, 4-8 sentences when rich metadata/patterns emerge
+                    2. Synthesize insights from: column name -> table context -> sample data -> metadata statistics
+                    3. Unpack acronyms confidently. Note anomalies (e.g., unexpectedly low distinct counts, suspicious nulls, data type mismatches)
+                    4. Sample data may not represent full distribution - use metadata to validate/contradict sample observations
+                    5. Use double quotes for strings. Escape apostrophes with '' (SQL style) for DDL compatibility
+                    6. 'index' key is from Pandas to_dict() - ignore unless in 'columns' list
+                    7. Return ONLY the JSON dictionary
+                    8. Do not include example values in the comment if the values are PII.
+                    """,
+                },
+                {
+                    "role": "user",
+                    "content": """Content is here - {"table_name": "retail.transactions.daily_sales", "column_contents": {"index": [0,1,2], "columns": ["transaction_id", "sale_amount", "is_refund"], "data": [["TXN001", "49.99", "false"], ["TXN002", "125.00", "false"], ["TXN003", "89.50", "false"]], "column_metadata": {"transaction_id": {"col_name": "transaction_id", "data_type": "string", "num_nulls": "0", "distinct_count": "50000", "avg_col_len": "6", "max_col_len": "6"}, "sale_amount": {"col_name": "sale_amount", "data_type": "decimal", "num_nulls": "0", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "8"}, "is_refund": {"col_name": "is_refund", "data_type": "string", "num_nulls": "0", "distinct_count": "2", "avg_col_len": "5", "max_col_len": "5"}}}} and abbreviations and acronyms are here - {}""",
+                },
+                {
+                    "role": "assistant",
+                    "content": """{"table": "Daily retail transaction records tracking individual sales and refunds. Located in the retail catalog under transactions schema, indicating transactional operational data.", "columns": ["transaction_id", "sale_amount", "is_refund"], "column_contents": ["Unique transaction identifier following 'TXN###' format. Sample shows sequential numbering (TXN001-003). No nulls with 50,000 distinct values indicating good uniqueness across full dataset.", "Sale amount in decimal format representing transaction total. Sample shows values ranging from $49.99 to $125.00 with two decimal precision. 15,000 distinct values suggests diverse pricing, no nulls indicates required field.", "Refund flag stored as string ('true'/'false') rather than boolean data type. Sample shows only 'false' values but metadata confirms 2 distinct values exist in full dataset. No nulls indicates system always populates this field, likely defaulting to 'false' for new transactions."]}""",
+                },
+                {
+                    "role": "user",
+                    "content": """Content is here - {"table_name": "healthcare.clinical.patient_lab_results", "column_contents": {"index": [0,1,2,3], "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "data": [["MRN-2024-8901", "2024-03-15", "GLUC", "105", "70", "100", "H", "Dr. Smith"], ["MRN-2024-8902", "2024-03-15", "HBA1C", "6.2", "4.0", "5.6", "H", "Dr. Johnson"], ["MRN-2024-8903", "2024-03-16", "CHOL", "185", "125", "200", "N", "Dr. Smith"], ["MRN-2024-8904", "2024-03-16", "GLUC", "92", "70", "100", "N", "Dr. Williams"]], "column_metadata": {"patient_mrn": {"col_name": "patient_mrn", "data_type": "string", "num_nulls": "0", "distinct_count": "8500", "avg_col_len": "14", "max_col_len": "14"}, "test_date": {"col_name": "test_date", "data_type": "date", "num_nulls": "0", "distinct_count": "365", "avg_col_len": "10", "max_col_len": "10"}, "test_code": {"col_name": "test_code", "data_type": "string", "num_nulls": "0", "distinct_count": "250", "avg_col_len": "5", "max_col_len": "8"}, "result_value": {"col_name": "result_value", "data_type": "string", "num_nulls": "12", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "20"}, "ref_range_low": {"col_name": "ref_range_low", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "ref_range_high": {"col_name": "ref_range_high", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "abnormal_flag": {"col_name": "abnormal_flag", "data_type": "string", "num_nulls": "0", "distinct_count": "4", "avg_col_len": "1", "max_col_len": "2"}, "ordering_physician": {"col_name": "ordering_physician", "data_type": "string", "num_nulls": "5", "distinct_count": "45", "avg_col_len": "12", "max_col_len": "30"}}}} and abbreviations and acronyms are here - {"MRN - Medical Record Number", "GLUC - Glucose", "HBA1C - Hemoglobin A1C", "CHOL - Cholesterol"}""",
+                },
+                {
+                    "role": "assistant",
+                    "content": """{"table": "Clinical laboratory test results for patients, combining patient identifiers with test metadata, results, and ordering physician information. Located in healthcare.clinical schema indicating protected health information requiring appropriate access controls. The table structure supports multiple test types per patient over time, with reference ranges for result interpretation.", "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "column_contents": ["Medical Record Number serving as the patient identifier. Consistent 14-character format with 8,500 distinct values across the dataset and no nulls, indicating strong data quality. The 'MRN-YYYY-####' format visible in samples suggests year-based record numbering.", "Date when the laboratory test was performed. Zero nulls with 365 distinct dates suggests approximately daily testing activity over a year. Consistent 10-character length indicates standard date format (YYYY-MM-DD). Sample shows clustering of tests on same dates, which is typical for batch processing of lab orders.", "Standardized laboratory test code identifier. Sample shows common codes (GLUC for Glucose, HBA1C for Hemoglobin A1C, CHOL for Cholesterol) with 250 distinct test types available. Variable length (5-8 characters) accommodates different coding standards. No nulls indicates required field for all lab orders.", "Numeric test result stored as string to accommodate diverse result formats across test types. High cardinality (15,000 distinct values) appropriate for continuous measurements. Notably contains 12 nulls which likely represent pending, cancelled, or failed tests - important for downstream processing to handle missing results. Variable length (max 20 characters) suggests accommodation of text qualifiers or complex results beyond simple numerics.", "Lower bound of the normal reference range for test interpretation. The 50 null values correlate with potential gaps where tests may not have established reference ranges or use alternative interpretation methods. 150 distinct values indicates reference ranges vary by test type and possibly by patient demographics (age, gender). Sample data shows values like 70 (glucose), 4.0 (HBA1C), 125 (cholesterol) providing context for result interpretation.", "Upper bound of the normal reference range. Mirrors the null pattern of 'ref_range_low' (50 nulls), confirming these are paired values that should be populated or null together. The sample data shows reference ranges contextualizing result values (e.g., glucose 105 vs range 70-100 flagged as high). Consistent character lengths with low bound suggests standardized numeric formatting.", "Result interpretation flag indicating whether the value falls outside normal parameters. Sample shows 'H' (High) and 'N' (Normal) with metadata indicating 4 distinct values total (likely H, L, N, and possibly Critical). Single-character format with max length 2 suggests occasional use of two-character codes. Zero nulls indicates this is a required calculated/derived field, essential for clinical decision support and alerts.", "Name of the physician who ordered the laboratory test. Contains 5 nulls (0.06% of records) suggesting some tests may be ordered by non-physician providers, through automated standing orders, or via clinical protocols. Low cardinality (45 distinct physicians for 8,500 patients) indicates a small practice, specialized facility, or limited provider network. Variable length (12-30 characters) accommodates different name formats and titles. The 'Dr.' prefix in samples suggests consistent title formatting, though full names create the length variability."]}""",
+                },
+                {
+                    "role": "user",
+                    "content": f"""Content is here - {content} and abbreviations are here - {acro_content}""",
+                },
+            ]
+        }
 
 
 class PIPrompt(Prompt):
@@ -718,116 +718,116 @@ class PIPrompt(Prompt):
         }
 
 
-# class CommentNoDataPrompt(Prompt):
-#     """
-#     Prompt for generating metadata for tables and columns in Databricks.
-#     """
+class CommentNoDataPrompt(Prompt):
+    """
+    Prompt for generating metadata for tables and columns in Databricks.
+    """
 
-#     def convert_to_comment_input(self) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Convert DataFrame to a dictionary format suitable for comment input.
+    def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        """
+        Convert DataFrame to a dictionary format suitable for comment input.
 
-#         Returns:
-#             Dict[str, Any]: Dictionary containing table and column contents.
-#         """
-#         pandas_df = self.df.toPandas()
-#         if self.config.limit_prompt_based_on_cell_len:
-#             truncated_pandas_df = self.calculate_cell_length(pandas_df)
-#         else:
-#             truncated_pandas_df = pandas_df
-#         return {
-#             "table_name": self.full_table_name,
-#             "column_contents": truncated_pandas_df.to_dict(orient="split"),
-#         }
+        Returns:
+            Dict[str, Any]: Dictionary containing table and column contents.
+        """
+        pandas_df = self.df.toPandas()
+        if self.config.limit_prompt_based_on_cell_len:
+            truncated_pandas_df = self.calculate_cell_length(pandas_df)
+        else:
+            truncated_pandas_df = pandas_df
+        return {
+            "table_name": self.full_table_name,
+            "column_contents": truncated_pandas_df.to_dict(orient="split"),
+        }
 
-#     def create_prompt_template(self) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Create a prompt template for generating metadata for tables and columns in Databricks.
+    def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        """
+        Create a prompt template for generating metadata for tables and columns in Databricks.
 
-#         Returns:
-#             Dict[str, Any]: Dictionary containing the prompt template.
-#         """
-#         print("Creating comment prompt template with no data in comments...")
-#         content = self.prompt_content
-#         acro_content = self.config.acro_content
-#         return {
-#             "comment": [
-#                 {
-#                     "role": "system",
-#                     "content": """Generate comprehensive metadata comments for Databricks tables and columns. Analyze all provided information (table name, column names, data samples, metadata statistics, acronyms) to create well-reasoned descriptions. **CRITICAL: Do NOT include any actual data values in your descriptions - this data may be sensitive.**
+        Returns:
+            Dict[str, Any]: Dictionary containing the prompt template.
+        """
+        print("Creating comment prompt template with no data in comments...")
+        content = self.prompt_content
+        acro_content = self.config.acro_content
+        return {
+            "comment": [
+                {
+                    "role": "system",
+                    "content": """Generate comprehensive metadata comments for Databricks tables and columns. Analyze all provided information (table name, column names, data samples, metadata statistics, acronyms) to create well-reasoned descriptions. **CRITICAL: Do NOT include any actual data values in your descriptions - this data may be sensitive.**
 
-#                     Response Format (MUST be valid JSON with arrays, not stringified arrays):
-#                     {"table": "description", "columns": ["col1", "col2"], "column_contents": ["col1 desc", "col2 desc"]}
+                    Response Format (MUST be valid JSON with arrays, not stringified arrays):
+                    {"table": "description", "columns": ["col1", "col2"], "column_contents": ["col1 desc", "col2 desc"]}
                     
-#                     IMPORTANT: column_contents must be a JSON array [...], NOT a string containing an array.
+                    IMPORTANT: column_contents must be a JSON array [...], NOT a string containing an array.
 
-#                     Guidelines:
-#                     1. Scale comment length with information richness: 2-3 sentences for simple columns, 4-8 sentences when rich metadata/patterns emerge
-#                     2. Synthesize insights from: column name -> table context -> sample data patterns -> metadata statistics (WITHOUT citing specific values)
-#                     3. Unpack acronyms confidently. Note anomalies (e.g., unexpectedly low distinct counts, suspicious nulls, data type mismatches)
-#                     4. Use sample data to understand patterns/formats/types, but describe generically without quoting specific values
-#                     5. Use double quotes for strings. Escape apostrophes with '' (SQL style) for DDL compatibility
-#                     6. 'index' key is from Pandas to_dict() - ignore unless in 'columns' list
-#                     7. Return ONLY the JSON dictionary
-#                     8. Do not include example values in the comment ever.
-#                     """,
-#                 },
-#                 {
-#                     "role": "user",
-#                     "content": """Content is here - {"table_name": "retail.transactions.daily_sales", "column_contents": {"index": [0,1,2], "columns": ["transaction_id", "sale_amount", "is_refund"], "data": [["TXN001", "49.99", "false"], ["TXN002", "125.00", "false"], ["TXN003", "89.50", "false"]], "column_metadata": {"transaction_id": {"col_name": "transaction_id", "data_type": "string", "num_nulls": "0", "distinct_count": "50000", "avg_col_len": "6", "max_col_len": "6"}, "sale_amount": {"col_name": "sale_amount", "data_type": "decimal", "num_nulls": "0", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "8"}, "is_refund": {"col_name": "is_refund", "data_type": "string", "num_nulls": "0", "distinct_count": "2", "avg_col_len": "5", "max_col_len": "5"}}}} and abbreviations and acronyms are here - {}""",
-#                 },
-#                 {
-#                     "role": "assistant",
-#                     "content": """{"table": "Daily retail transaction records tracking individual sales and refunds. Located in the retail catalog under transactions schema, indicating transactional operational data.", "columns": ["transaction_id", "sale_amount", "is_refund"], "column_contents": ["Unique transaction identifier following alphanumeric format with consistent length. No nulls with 50,000 distinct values indicating good uniqueness across full dataset.", "Sale amount in decimal format representing transaction total with two decimal precision. 15,000 distinct values suggests diverse pricing, no nulls indicates required field.", "Refund flag stored as string rather than boolean data type. Metadata confirms 2 distinct values exist in full dataset. No nulls indicates system always populates this field."]}""",
-#                 },
-#                 {
-#                     "role": "user",
-#                     "content": """Content is here - {"table_name": "healthcare.clinical.patient_lab_results", "column_contents": {"index": [0,1,2,3], "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "data": [["MRN-2024-8901", "2024-03-15", "GLUC", "105", "70", "100", "H", "Dr. Smith"], ["MRN-2024-8902", "2024-03-15", "HBA1C", "6.2", "4.0", "5.6", "H", "Dr. Johnson"], ["MRN-2024-8903", "2024-03-16", "CHOL", "185", "125", "200", "N", "Dr. Smith"], ["MRN-2024-8904", "2024-03-16", "GLUC", "92", "70", "100", "N", "Dr. Williams"]], "column_metadata": {"patient_mrn": {"col_name": "patient_mrn", "data_type": "string", "num_nulls": "0", "distinct_count": "8500", "avg_col_len": "14", "max_col_len": "14"}, "test_date": {"col_name": "test_date", "data_type": "date", "num_nulls": "0", "distinct_count": "365", "avg_col_len": "10", "max_col_len": "10"}, "test_code": {"col_name": "test_code", "data_type": "string", "num_nulls": "0", "distinct_count": "250", "avg_col_len": "5", "max_col_len": "8"}, "result_value": {"col_name": "result_value", "data_type": "string", "num_nulls": "12", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "20"}, "ref_range_low": {"col_name": "ref_range_low", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "ref_range_high": {"col_name": "ref_range_high", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "abnormal_flag": {"col_name": "abnormal_flag", "data_type": "string", "num_nulls": "0", "distinct_count": "4", "avg_col_len": "1", "max_col_len": "2"}, "ordering_physician": {"col_name": "ordering_physician", "data_type": "string", "num_nulls": "5", "distinct_count": "45", "avg_col_len": "12", "max_col_len": "30"}}}} and abbreviations and acronyms are here - {"MRN - Medical Record Number", "GLUC - Glucose", "HBA1C - Hemoglobin A1C", "CHOL - Cholesterol"}""",
-#                 },
-#                 {
-#                     "role": "assistant",
-#                     "content": """{"table": "Clinical laboratory test results for patients, combining patient identifiers with test metadata, results, and ordering physician information. Located in healthcare.clinical schema indicating protected health information requiring appropriate access controls. The table structure supports multiple test types per patient over time, with reference ranges for result interpretation.", "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "column_contents": ["Medical Record Number serving as the patient identifier. Consistent 14-character format with 8,500 distinct values across the dataset and no nulls, indicating strong data quality. Format suggests year-based record numbering.", "Date when the laboratory test was performed. Zero nulls with 365 distinct dates suggests approximately daily testing activity over a year. Consistent 10-character length indicates standard date format. Sample patterns show clustering of tests on same dates, typical for batch processing of lab orders.", "Standardized laboratory test code identifier for common clinical tests including glucose, hemoglobin A1C, and cholesterol measurements. 250 distinct test types available with variable length (5-8 characters) accommodating different coding standards. No nulls indicates required field for all lab orders.", "Numeric test result stored as string to accommodate diverse result formats across test types. High cardinality (15,000 distinct values) appropriate for continuous measurements. Contains 12 nulls which likely represent pending, cancelled, or failed tests - important for downstream processing to handle missing results. Variable length (max 20 characters) suggests accommodation of text qualifiers or complex results beyond simple numerics.", "Lower bound of the normal reference range for test interpretation. The 50 null values correlate with potential gaps where tests may not have established reference ranges or use alternative interpretation methods. 150 distinct values indicates reference ranges vary by test type and possibly by patient demographics. Consistent character lengths suggest standardized numeric formatting.", "Upper bound of the normal reference range. Mirrors the null pattern (50 nulls), confirming these are paired values that should be populated or null together. Format provides context for result interpretation alongside lower bounds. Consistent character lengths with low bound suggests standardized numeric formatting.", "Result interpretation flag indicating whether values fall outside normal parameters. Single-character format with metadata indicating 4 distinct values (likely High, Low, Normal, and possibly Critical). Max length of 2 suggests occasional use of two-character codes. Zero nulls indicates this is a required calculated/derived field, essential for clinical decision support and alerts.", "Name of the physician who ordered the laboratory test. Contains 5 nulls (0.06% of records) suggesting some tests may be ordered by non-physician providers, through automated standing orders, or via clinical protocols. Low cardinality (45 distinct physicians for 8,500 patients) indicates a small practice, specialized facility, or limited provider network. Variable length (12-30 characters) accommodates different name formats and titles with professional prefixes."]}""",
-#                 },
-#                 {
-#                     "role": "user",
-#                     "content": f"""Content is here - {content} and abbreviations are here - {acro_content}""",
-#                 },
-#             ]
-#         }
+                    Guidelines:
+                    1. Scale comment length with information richness: 2-3 sentences for simple columns, 4-8 sentences when rich metadata/patterns emerge
+                    2. Synthesize insights from: column name -> table context -> sample data patterns -> metadata statistics (WITHOUT citing specific values)
+                    3. Unpack acronyms confidently. Note anomalies (e.g., unexpectedly low distinct counts, suspicious nulls, data type mismatches)
+                    4. Use sample data to understand patterns/formats/types, but describe generically without quoting specific values
+                    5. Use double quotes for strings. Escape apostrophes with '' (SQL style) for DDL compatibility
+                    6. 'index' key is from Pandas to_dict() - ignore unless in 'columns' list
+                    7. Return ONLY the JSON dictionary
+                    8. Do not include example values in the comment ever.
+                    """,
+                },
+                {
+                    "role": "user",
+                    "content": """Content is here - {"table_name": "retail.transactions.daily_sales", "column_contents": {"index": [0,1,2], "columns": ["transaction_id", "sale_amount", "is_refund"], "data": [["TXN001", "49.99", "false"], ["TXN002", "125.00", "false"], ["TXN003", "89.50", "false"]], "column_metadata": {"transaction_id": {"col_name": "transaction_id", "data_type": "string", "num_nulls": "0", "distinct_count": "50000", "avg_col_len": "6", "max_col_len": "6"}, "sale_amount": {"col_name": "sale_amount", "data_type": "decimal", "num_nulls": "0", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "8"}, "is_refund": {"col_name": "is_refund", "data_type": "string", "num_nulls": "0", "distinct_count": "2", "avg_col_len": "5", "max_col_len": "5"}}}} and abbreviations and acronyms are here - {}""",
+                },
+                {
+                    "role": "assistant",
+                    "content": """{"table": "Daily retail transaction records tracking individual sales and refunds. Located in the retail catalog under transactions schema, indicating transactional operational data.", "columns": ["transaction_id", "sale_amount", "is_refund"], "column_contents": ["Unique transaction identifier following alphanumeric format with consistent length. No nulls with 50,000 distinct values indicating good uniqueness across full dataset.", "Sale amount in decimal format representing transaction total with two decimal precision. 15,000 distinct values suggests diverse pricing, no nulls indicates required field.", "Refund flag stored as string rather than boolean data type. Metadata confirms 2 distinct values exist in full dataset. No nulls indicates system always populates this field."]}""",
+                },
+                {
+                    "role": "user",
+                    "content": """Content is here - {"table_name": "healthcare.clinical.patient_lab_results", "column_contents": {"index": [0,1,2,3], "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "data": [["MRN-2024-8901", "2024-03-15", "GLUC", "105", "70", "100", "H", "Dr. Smith"], ["MRN-2024-8902", "2024-03-15", "HBA1C", "6.2", "4.0", "5.6", "H", "Dr. Johnson"], ["MRN-2024-8903", "2024-03-16", "CHOL", "185", "125", "200", "N", "Dr. Smith"], ["MRN-2024-8904", "2024-03-16", "GLUC", "92", "70", "100", "N", "Dr. Williams"]], "column_metadata": {"patient_mrn": {"col_name": "patient_mrn", "data_type": "string", "num_nulls": "0", "distinct_count": "8500", "avg_col_len": "14", "max_col_len": "14"}, "test_date": {"col_name": "test_date", "data_type": "date", "num_nulls": "0", "distinct_count": "365", "avg_col_len": "10", "max_col_len": "10"}, "test_code": {"col_name": "test_code", "data_type": "string", "num_nulls": "0", "distinct_count": "250", "avg_col_len": "5", "max_col_len": "8"}, "result_value": {"col_name": "result_value", "data_type": "string", "num_nulls": "12", "distinct_count": "15000", "avg_col_len": "6", "max_col_len": "20"}, "ref_range_low": {"col_name": "ref_range_low", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "ref_range_high": {"col_name": "ref_range_high", "data_type": "string", "num_nulls": "50", "distinct_count": "150", "avg_col_len": "4", "max_col_len": "6"}, "abnormal_flag": {"col_name": "abnormal_flag", "data_type": "string", "num_nulls": "0", "distinct_count": "4", "avg_col_len": "1", "max_col_len": "2"}, "ordering_physician": {"col_name": "ordering_physician", "data_type": "string", "num_nulls": "5", "distinct_count": "45", "avg_col_len": "12", "max_col_len": "30"}}}} and abbreviations and acronyms are here - {"MRN - Medical Record Number", "GLUC - Glucose", "HBA1C - Hemoglobin A1C", "CHOL - Cholesterol"}""",
+                },
+                {
+                    "role": "assistant",
+                    "content": """{"table": "Clinical laboratory test results for patients, combining patient identifiers with test metadata, results, and ordering physician information. Located in healthcare.clinical schema indicating protected health information requiring appropriate access controls. The table structure supports multiple test types per patient over time, with reference ranges for result interpretation.", "columns": ["patient_mrn", "test_date", "test_code", "result_value", "ref_range_low", "ref_range_high", "abnormal_flag", "ordering_physician"], "column_contents": ["Medical Record Number serving as the patient identifier. Consistent 14-character format with 8,500 distinct values across the dataset and no nulls, indicating strong data quality. Format suggests year-based record numbering.", "Date when the laboratory test was performed. Zero nulls with 365 distinct dates suggests approximately daily testing activity over a year. Consistent 10-character length indicates standard date format. Sample patterns show clustering of tests on same dates, typical for batch processing of lab orders.", "Standardized laboratory test code identifier for common clinical tests including glucose, hemoglobin A1C, and cholesterol measurements. 250 distinct test types available with variable length (5-8 characters) accommodating different coding standards. No nulls indicates required field for all lab orders.", "Numeric test result stored as string to accommodate diverse result formats across test types. High cardinality (15,000 distinct values) appropriate for continuous measurements. Contains 12 nulls which likely represent pending, cancelled, or failed tests - important for downstream processing to handle missing results. Variable length (max 20 characters) suggests accommodation of text qualifiers or complex results beyond simple numerics.", "Lower bound of the normal reference range for test interpretation. The 50 null values correlate with potential gaps where tests may not have established reference ranges or use alternative interpretation methods. 150 distinct values indicates reference ranges vary by test type and possibly by patient demographics. Consistent character lengths suggest standardized numeric formatting.", "Upper bound of the normal reference range. Mirrors the null pattern (50 nulls), confirming these are paired values that should be populated or null together. Format provides context for result interpretation alongside lower bounds. Consistent character lengths with low bound suggests standardized numeric formatting.", "Result interpretation flag indicating whether values fall outside normal parameters. Single-character format with metadata indicating 4 distinct values (likely High, Low, Normal, and possibly Critical). Max length of 2 suggests occasional use of two-character codes. Zero nulls indicates this is a required calculated/derived field, essential for clinical decision support and alerts.", "Name of the physician who ordered the laboratory test. Contains 5 nulls (0.06% of records) suggesting some tests may be ordered by non-physician providers, through automated standing orders, or via clinical protocols. Low cardinality (45 distinct physicians for 8,500 patients) indicates a small practice, specialized facility, or limited provider network. Variable length (12-30 characters) accommodates different name formats and titles with professional prefixes."]}""",
+                },
+                {
+                    "role": "user",
+                    "content": f"""Content is here - {content} and abbreviations are here - {acro_content}""",
+                },
+            ]
+        }
 
 
-# class DomainPrompt(Prompt):
-#     """
-#     Prompt for domain classification of tables.
-#     Domain classification is table-level only and uses metadata + column info.
-#     """
+class DomainPrompt(Prompt):
+    """
+    Prompt for domain classification of tables.
+    Domain classification is table-level only and uses metadata + column info.
+    """
 
-#     def convert_to_comment_input(self) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Convert DataFrame to a dictionary format for domain classification.
-#         Includes table name, column names, and sample data.
-#         """
-#         pandas_df = self.df.toPandas()
-#         if self.config.limit_prompt_based_on_cell_len:
-#             truncated_pandas_df = self.calculate_cell_length(pandas_df)
-#         else:
-#             truncated_pandas_df = pandas_df
-#         return {
-#             "table_name": self.full_table_name,
-#             "column_contents": truncated_pandas_df.to_dict(orient="split"),
-#         }
+    def convert_to_comment_input(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        """
+        Convert DataFrame to a dictionary format for domain classification.
+        Includes table name, column names, and sample data.
+        """
+        pandas_df = self.df.toPandas()
+        if self.config.limit_prompt_based_on_cell_len:
+            truncated_pandas_df = self.calculate_cell_length(pandas_df)
+        else:
+            truncated_pandas_df = pandas_df
+        return {
+            "table_name": self.full_table_name,
+            "column_contents": truncated_pandas_df.to_dict(orient="split"),
+        }
 
-#     def create_prompt_template(self) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Create prompt template for domain classification.
-#         This is used to prepare data for the agent, not as a chat template.
-#         """
-#         content = self.prompt_content
-#         return {"domain": content}
+    def create_prompt_template(self) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        """
+        Create prompt template for domain classification.
+        This is used to prepare data for the agent, not as a chat template.
+        """
+        content = self.prompt_content
+        return {"domain": content}
 
 
 class PromptFactory:
@@ -849,12 +849,12 @@ class PromptFactory:
         Returns:
             Prompt: A prompt object.
         """
-        # if config.mode == "comment" and config.allow_data_in_comments:
-        #     return CommentPrompt(config, df, full_table_name)
-        # if config.mode == "comment":
-        #     return CommentNoDataPrompt(config, df, full_table_name)
+        if config.mode == "comment" and config.allow_data_in_comments:
+            return CommentPrompt(config, df, full_table_name)
+        if config.mode == "comment":
+            return CommentNoDataPrompt(config, df, full_table_name)
         if config.mode == "pi":
             return PIPrompt(config, df, full_table_name)
-        # if config.mode == "domain":
-        #     return DomainPrompt(config, df, full_table_name)
+        if config.mode == "domain":
+            return DomainPrompt(config, df, full_table_name)
         raise ValueError("Invalid mode. Use 'pi', 'comment', or 'domain'.")

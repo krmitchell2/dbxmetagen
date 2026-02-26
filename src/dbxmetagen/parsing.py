@@ -1,37 +1,37 @@
-# """Parsing and cleansing utilities shared among modules."""
+"""Parsing and cleansing utilities shared among modules."""
 
-# import re
-# from typing import Optional
-# from deprecated import deprecated
-# from src.dbxmetagen.user_utils import sanitize_user_identifier
-# import sys
-
-
-# @deprecated("Use sanitize_user_identifier from processing module instead.")
-# def sanitize_email(email: str) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """Use sanitize_user_identifier from processing module instead."""
-#     return sanitize_user_identifier(email)
+import re
+from typing import Optional
+from deprecated import deprecated
+from src.dbxmetagen.user_utils import sanitize_user_identifier
+import sys
 
 
-# def cleanse_sql_comment(comment: str) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Cleanse a SQL comment string to make it compatible with DB SQL.
+@deprecated("Use sanitize_user_identifier from processing module instead.")
+def sanitize_email(email: str) -> str:
+    print(sys._getframe().f_code.co_name)
+    """Use sanitize_user_identifier from processing module instead."""
+    return sanitize_user_identifier(email)
 
-#     - Replaces double double-quotes ("") and single double-quotes (") with a single quote (').
-#     - Escapes single quotes (') by doubling them ('')
-#     - Leaves standard double quotes as-is (unless you need to escape them for your SQL dialect)
 
-#     Args:
-#         comment (str): The original comment string.
-#     Returns:
-#         str: The cleansed comment string.
-#     """
-#     if not comment:
-#         return comment
+def cleanse_sql_comment(comment: str) -> str:
+    print(sys._getframe().f_code.co_name)
+    """
+    Cleanse a SQL comment string to make it compatible with DB SQL.
 
-#     comment = comment.replace('""', "'")
-#     comment = comment.replace('"', "'")
+    - Replaces double double-quotes ("") and single double-quotes (") with a single quote (').
+    - Escapes single quotes (') by doubling them ('')
+    - Leaves standard double quotes as-is (unless you need to escape them for your SQL dialect)
 
-#     return comment
+    Args:
+        comment (str): The original comment string.
+    Returns:
+        str: The cleansed comment string.
+    """
+    if not comment:
+        return comment
+
+    comment = comment.replace('""', "'")
+    comment = comment.replace('"', "'")
+
+    return comment

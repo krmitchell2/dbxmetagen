@@ -60,20 +60,18 @@ except ImportError:
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 from src.dbxmetagen.config import MetadataConfig
 from src.dbxmetagen.sampling import determine_sampling_ratio
-# from src.dbxmetagen.prompts import Prompt, PIPrompt, CommentPrompt, PromptFactory
-from src.dbxmetagen.prompts import Prompt, PIPrompt, PromptFactory
-from src.dbxmetagen.error_handling import validate_csv
-# from src.dbxmetagen.error_handling import exponential_backoff, validate_csv
-# from src.dbxmetagen.comment_summarizer import TableCommentSummarizer
+from src.dbxmetagen.prompts import Prompt, PIPrompt, CommentPrompt, PromptFactory
+from src.dbxmetagen.error_handling import exponential_backoff, validate_csv
+from src.dbxmetagen.comment_summarizer import TableCommentSummarizer
 from src.dbxmetagen.metadata_generator import (
     Response,
     PIResponse,
-    # CommentResponse,
+    CommentResponse,
     PIColumnContent,
     MetadataGeneratorFactory,
     PIIdentifier,
     MetadataGenerator,
-    # CommentGenerator,
+    CommentGenerator,
 )
 from src.dbxmetagen.overrides import (
     override_metadata_from_csv,
@@ -82,7 +80,7 @@ from src.dbxmetagen.overrides import (
     get_join_conditions,
 )
 from src.dbxmetagen.user_utils import sanitize_user_identifier, get_current_user
-# from src.dbxmetagen.domain_classifier import load_domain_config, classify_table_domain
+from src.dbxmetagen.domain_classifier import load_domain_config, classify_table_domain
 
 logging.basicConfig(
     level=logging.WARNING,
@@ -95,72 +93,72 @@ logger = logging.getLogger(__name__)
 logging.getLogger("pyspark.sql.connect.client.logging").setLevel(logging.CRITICAL)
 
 
-# def extract_concise_error(error: Exception) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Extract a concise error message from an exception, removing JVM stacktraces.
-#     For tag policy violations, extracts just the relevant tag information.
+def extract_concise_error(error: Exception) -> str:
+    print(sys._getframe().f_code.co_name)
+    """
+    Extract a concise error message from an exception, removing JVM stacktraces.
+    For tag policy violations, extracts just the relevant tag information.
 
-#     Args:
-#         error: The exception to extract the message from
+    Args:
+        error: The exception to extract the message from
 
-#     Returns:
-#         A concise error message string
-#     """
-#     error_str = str(error)
-#     if "INVALID_PARAMETER_VALUE" in error_str and "Tag value" in error_str:
-#         match = re.search(
-#             r"Tag value (\S+) is not an allowed value for tag policy key (\S+)",
-#             error_str,
-#         )
-#         if match:
-#             tag_value, tag_key = match.groups()
-#             return f"Tag policy violation: '{tag_key}' cannot be set to '{tag_value}'"
-#     return (
-#         error_str.split("JVM stacktrace:")[0].strip()
-#         if "JVM stacktrace:" in error_str
-#         else error_str
-#     )
-
-
-# class DDLGenerator(ABC):
-#     """DDLGenerator class."""
-
-#     def __init__(self):
-#         print(sys._getframe().f_code.co_name)
-#         pass
+    Returns:
+        A concise error message string
+    """
+    error_str = str(error)
+    if "INVALID_PARAMETER_VALUE" in error_str and "Tag value" in error_str:
+        match = re.search(
+            r"Tag value (\S+) is not an allowed value for tag policy key (\S+)",
+            error_str,
+        )
+        if match:
+            tag_value, tag_key = match.groups()
+            return f"Tag policy violation: '{tag_key}' cannot be set to '{tag_value}'"
+    return (
+        error_str.split("JVM stacktrace:")[0].strip()
+        if "JVM stacktrace:" in error_str
+        else error_str
+    )
 
 
-# class Input(BaseModel):
-#     """Input class."""
+class DDLGenerator(ABC):
+    """DDLGenerator class."""
 
-#     ### Currently not implemented.
-#     model_config = ConfigDict(extra="forbid")
-
-#     table_name: str
-
-#     @classmethod
-#     def from_df(cls, df: DataFrame) -> Dict[str, Any]:
-#         print(sys._getframe().f_code.co_name)
-#         """From DataFrame class."""
-#         return {
-#             "table_name": f"{catalog_name}.{schema_name}.{table_name}",
-#             "column_contents": cls.df.toPandas().to_dict(orient="list"),
-#         }
+    def __init__(self):
+        print(sys._getframe().f_code.co_name)
+        pass
 
 
-# def tag_table(table_name: str, tags: Dict[str, str]) -> None:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Tags a table with the provided tags.
+class Input(BaseModel):
+    """Input class."""
 
-#     Args:
-#         table_name (str): The name of the table to tag.
-#         tags (Dict[str, str]): A dictionary of tags to apply to the table.
-#     """
-#     spark = SparkSession.builder.getOrCreate()
-#     for key, value in tags.items():
-#         spark.sql(f"ALTER TABLE {table_name} SET TBLPROPERTIES ('{key}' = '{value}');")
+    ### Currently not implemented.
+    model_config = ConfigDict(extra="forbid")
+
+    table_name: str
+
+    @classmethod
+    def from_df(cls, df: DataFrame) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
+        """From DataFrame class."""
+        return {
+            "table_name": f"{catalog_name}.{schema_name}.{table_name}",
+            "column_contents": cls.df.toPandas().to_dict(orient="list"),
+        }
+
+
+def tag_table(table_name: str, tags: Dict[str, str]) -> None:
+    print(sys._getframe().f_code.co_name)
+    """
+    Tags a table with the provided tags.
+
+    Args:
+        table_name (str): The name of the table to tag.
+        tags (Dict[str, str]): A dictionary of tags to apply to the table.
+    """
+    spark = SparkSession.builder.getOrCreate()
+    for key, value in tags.items():
+        spark.sql(f"ALTER TABLE {table_name} SET TBLPROPERTIES ('{key}' = '{value}');")
 
 
 def write_to_log_table(log_data: Dict[str, Any], log_table_name: str) -> None:
@@ -222,12 +220,12 @@ def chunk_df(df: DataFrame, columns_per_call: int = 5) -> List[DataFrame]:
     return dataframes
 
 
-# def get_extended_metadata_for_column(config, table_name, column_name):
-#     print(sys._getframe().f_code.co_name)
-#     """Get extended metadata for a column."""
-#     spark = SparkSession.builder.getOrCreate()
-#     query = f"""DESCRIBE EXTENDED {config.catalog_name}.{config.schema_name}.{table_name} `{column_name}`;"""
-#     return spark.sql(query)
+def get_extended_metadata_for_column(config, table_name, column_name):
+    print(sys._getframe().f_code.co_name)
+    """Get extended metadata for a column."""
+    spark = SparkSession.builder.getOrCreate()
+    query = f"""DESCRIBE EXTENDED {config.catalog_name}.{config.schema_name}.{table_name} `{column_name}`;"""
+    return spark.sql(query)
 
 
 def get_column_types_from_describe(spark: SparkSession, full_table_name: str) -> dict:
@@ -304,59 +302,59 @@ def read_table_with_type_conversion(
         return spark.read.table(full_table_name)
 
 
-# def convert_special_types_to_string(df: DataFrame) -> DataFrame:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Convert BINARY and VARIANT columns to string format for processing.
+def convert_special_types_to_string(df: DataFrame) -> DataFrame:
+    print(sys._getframe().f_code.co_name)
+    """
+    Convert BINARY and VARIANT columns to string format for processing.
 
-#     Note: For tables with VARIANT columns in Spark Connect (serverless), use
-#     read_table_with_type_conversion() instead, as df.schema access will fail.
+    Note: For tables with VARIANT columns in Spark Connect (serverless), use
+    read_table_with_type_conversion() instead, as df.schema access will fail.
 
-#     - BINARY columns are encoded as base64 strings
-#     - VARIANT columns are converted to JSON strings
+    - BINARY columns are encoded as base64 strings
+    - VARIANT columns are converted to JSON strings
 
-#     Args:
-#         df (DataFrame): The DataFrame to convert.
+    Args:
+        df (DataFrame): The DataFrame to convert.
 
-#     Returns:
-#         DataFrame: DataFrame with BINARY and VARIANT columns converted to strings.
-#     """
-#     try:
-#         schema_fields = df.schema.fields
-#     except Exception as e:
-#         # Schema access can fail with VARIANT types in Spark Connect
-#         print(
-#             f"Warning: Could not access DataFrame schema ({e}). "
-#             "Special types may not be converted. Use read_table_with_type_conversion() instead."
-#         )
-#         return df
+    Returns:
+        DataFrame: DataFrame with BINARY and VARIANT columns converted to strings.
+    """
+    try:
+        schema_fields = df.schema.fields
+    except Exception as e:
+        # Schema access can fail with VARIANT types in Spark Connect
+        print(
+            f"Warning: Could not access DataFrame schema ({e}). "
+            "Special types may not be converted. Use read_table_with_type_conversion() instead."
+        )
+        return df
 
-#     for field in schema_fields:
-#         col_name = field.name
-#         col_type = field.dataType
+    for field in schema_fields:
+        col_name = field.name
+        col_type = field.dataType
 
-#         # Handle BINARY type - encode as base64, truncated to 50 chars (enough for LLM identification)
-#         if isinstance(col_type, BinaryType):
-#             print(f"Converting BINARY column '{col_name}' to base64 string (truncated)")
-#             df = df.withColumn(col_name, expr(f"substr(base64(`{col_name}`), 1, 50)"))
+        # Handle BINARY type - encode as base64, truncated to 50 chars (enough for LLM identification)
+        if isinstance(col_type, BinaryType):
+            print(f"Converting BINARY column '{col_name}' to base64 string (truncated)")
+            df = df.withColumn(col_name, expr(f"substr(base64(`{col_name}`), 1, 50)"))
 
-#         # Handle VARIANT type - convert to JSON string using to_json()
-#         # VARIANT type can be represented multiple ways in schema
-#         else:
-#             type_str = str(col_type).upper()
-#             type_class = type(col_type).__name__.upper()
-#             if (
-#                 "VARIANT" in type_str
-#                 or "VARIANT" in type_class
-#                 or "UNPARSED" in type_str
-#                 or "UNPARSED" in type_class
-#             ):
-#                 print(
-#                     f"Converting VARIANT column '{col_name}' (type: {col_type}) to JSON string using to_json()"
-#                 )
-#                 df = df.withColumn(col_name, to_json(col(col_name)))
+        # Handle VARIANT type - convert to JSON string using to_json()
+        # VARIANT type can be represented multiple ways in schema
+        else:
+            type_str = str(col_type).upper()
+            type_class = type(col_type).__name__.upper()
+            if (
+                "VARIANT" in type_str
+                or "VARIANT" in type_class
+                or "UNPARSED" in type_str
+                or "UNPARSED" in type_class
+            ):
+                print(
+                    f"Converting VARIANT column '{col_name}' (type: {col_type}) to JSON string using to_json()"
+                )
+                df = df.withColumn(col_name, to_json(col(col_name)))
 
-#     return df
+    return df
 
 
 def sample_df(df: DataFrame, nrows: int, sample_size: int = 5) -> DataFrame:
@@ -403,83 +401,83 @@ def sample_df(df: DataFrame, nrows: int, sample_size: int = 5) -> DataFrame:
     return filtered_df.limit(sample_size)
 
 
-# def append_table_row(
-#     rows: List[Row],
-#     full_table_name: str,
-#     response: Dict[str, Any],
-#     tokenized_full_table_name: str,
-# ) -> List[Row]:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Appends a table row to the list of rows.
+def append_table_row(
+    rows: List[Row],
+    full_table_name: str,
+    response: Dict[str, Any],
+    tokenized_full_table_name: str,
+) -> List[Row]:
+    print(sys._getframe().f_code.co_name)
+    """
+    Appends a table row to the list of rows.
 
-#     Args:
-#         rows (List[Row]): The list of rows to append to.
-#         full_table_name (str): The full name of the table.
-#         response (Dict[str, Any]): The response dictionary containing table information.
+    Args:
+        rows (List[Row]): The list of rows to append to.
+        full_table_name (str): The full name of the table.
+        response (Dict[str, Any]): The response dictionary containing table information.
 
-#     Returns:
-#         List[Row]: The updated list of rows with the new table row appended.
-#     """
-#     row = Row(
-#         table=full_table_name,
-#         tokenized_table=tokenized_full_table_name,
-#         ddl_type="table",
-#         column_name="None",
-#         column_content=str(
-#             response.table
-#         ),  # Ensure string type for serverless compatibility
-#     )
-#     rows.append(row)
-#     return rows
+    Returns:
+        List[Row]: The updated list of rows with the new table row appended.
+    """
+    row = Row(
+        table=full_table_name,
+        tokenized_table=tokenized_full_table_name,
+        ddl_type="table",
+        column_name="None",
+        column_content=str(
+            response.table
+        ),  # Ensure string type for serverless compatibility
+    )
+    rows.append(row)
+    return rows
 
 
-# def append_domain_table_row(
-#     rows: List[Row],
-#     full_table_name: str,
-#     domain_result: Dict[str, Any],
-#     tokenized_full_table_name: str,
-# ) -> List[Row]:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Appends a domain classification row to the list of rows.
+def append_domain_table_row(
+    rows: List[Row],
+    full_table_name: str,
+    domain_result: Dict[str, Any],
+    tokenized_full_table_name: str,
+) -> List[Row]:
+    print(sys._getframe().f_code.co_name)
+    """
+    Appends a domain classification row to the list of rows.
 
-#     Args:
-#         rows (List[Row]): The list of rows to append to.
-#         full_table_name (str): The full name of the table.
-#         domain_result (Dict[str, Any]): The domain classification result.
-#         tokenized_full_table_name (str): The tokenized table name.
+    Args:
+        rows (List[Row]): The list of rows to append to.
+        full_table_name (str): The full name of the table.
+        domain_result (Dict[str, Any]): The domain classification result.
+        tokenized_full_table_name (str): The tokenized table name.
 
-#     Returns:
-#         List[Row]: The updated list of rows with the new domain row appended.
-#     """
-#     domain_comment = (
-#         f"Domain: {domain_result['domain']}"
-#         + (
-#             f" | Subdomain: {domain_result['subdomain']}"
-#             if domain_result.get("subdomain")
-#             else ""
-#         )
-#         + f" | Confidence: {domain_result['confidence']:.2f}"
-#         + f" | Reasoning: {domain_result['reasoning']}"
-#     )
+    Returns:
+        List[Row]: The updated list of rows with the new domain row appended.
+    """
+    domain_comment = (
+        f"Domain: {domain_result['domain']}"
+        + (
+            f" | Subdomain: {domain_result['subdomain']}"
+            if domain_result.get("subdomain")
+            else ""
+        )
+        + f" | Confidence: {domain_result['confidence']:.2f}"
+        + f" | Reasoning: {domain_result['reasoning']}"
+    )
 
-#     row = Row(
-#         table=full_table_name,
-#         tokenized_table=tokenized_full_table_name,
-#         ddl_type="table",
-#         column_name="None",
-#         column_content=domain_comment,
-#         domain=domain_result["domain"],
-#         subdomain=domain_result.get("subdomain", "None"),
-#         confidence=float(domain_result["confidence"]),
-#         recommended_domain=domain_result.get("recommended_domain", "None"),
-#         recommended_subdomain=domain_result.get("recommended_subdomain", "None"),
-#         reasoning=domain_result["reasoning"],
-#         metadata_summary=domain_result["metadata_summary"],
-#     )
-#     rows.append(row)
-#     return rows
+    row = Row(
+        table=full_table_name,
+        tokenized_table=tokenized_full_table_name,
+        ddl_type="table",
+        column_name="None",
+        column_content=domain_comment,
+        domain=domain_result["domain"],
+        subdomain=domain_result.get("subdomain", "None"),
+        confidence=float(domain_result["confidence"]),
+        recommended_domain=domain_result.get("recommended_domain", "None"),
+        recommended_subdomain=domain_result.get("recommended_subdomain", "None"),
+        reasoning=domain_result["reasoning"],
+        metadata_summary=domain_result["metadata_summary"],
+    )
+    rows.append(row)
+    return rows
 
 
 def append_column_rows(
@@ -659,69 +657,69 @@ def rows_to_df(rows: List[Row], config: MetadataConfig) -> DataFrame:
         return df
 
 
-# def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Adds a DDL statement to a DataFrame for column comment.
+def add_ddl_to_column_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
+    print(sys._getframe().f_code.co_name)
+    """
+    Adds a DDL statement to a DataFrame for column comment.
 
-#     Args:
-#         df (DataFrame): The DataFrame to add the DDL statement to.
-#         ddl_column (str): The name of the DDL column.
+    Args:
+        df (DataFrame): The DataFrame to add the DDL statement to.
+        ddl_column (str): The name of the DDL column.
 
-#     Returns:
-#         DataFrame: The updated DataFrame with the DDL statement added.
-#     """
-#     if "column_content" in df.columns:
-#         df = df.withColumn(
-#             "column_content",
-#             regexp_replace(col("column_content").cast("string"), "''", "'"),
-#         )
+    Returns:
+        DataFrame: The updated DataFrame with the DDL statement added.
+    """
+    if "column_content" in df.columns:
+        df = df.withColumn(
+            "column_content",
+            regexp_replace(col("column_content").cast("string"), "''", "'"),
+        )
 
-#     result_df = df.withColumn(
-#         ddl_column,
-#         generate_column_comment_ddl("tokenized_table", "column_name", "column_content"),
-#     )
+    result_df = df.withColumn(
+        ddl_column,
+        generate_column_comment_ddl("tokenized_table", "column_name", "column_content"),
+    )
 
-#     if "column_content" in result_df.columns:
-#         result_df = result_df.withColumn(
-#             "column_content", col("column_content").cast("string")
-#         )
+    if "column_content" in result_df.columns:
+        result_df = result_df.withColumn(
+            "column_content", col("column_content").cast("string")
+        )
 
-#     return result_df
+    return result_df
 
 
-# def add_ddl_to_table_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Adds a DDL statement to a DataFrame for table comment.
+def add_ddl_to_table_comment_df(df: DataFrame, ddl_column: str) -> DataFrame:
+    print(sys._getframe().f_code.co_name)
+    """
+    Adds a DDL statement to a DataFrame for table comment.
 
-#     Args:
-#         df (DataFrame): The DataFrame to add the DDL statement to.
-#         ddl_column (str): The name of the DDL column.
+    Args:
+        df (DataFrame): The DataFrame to add the DDL statement to.
+        ddl_column (str): The name of the DDL column.
 
-#     Returns:
-#         DataFrame: The updated DataFrame with the DDL statement added.
-#     """
-#     if df is not None and "column_content" in df.columns:
-#         df = df.withColumn(
-#             "column_content",
-#             regexp_replace(col("column_content").cast("string"), "''", "'"),
-#         )
+    Returns:
+        DataFrame: The updated DataFrame with the DDL statement added.
+    """
+    if df is not None and "column_content" in df.columns:
+        df = df.withColumn(
+            "column_content",
+            regexp_replace(col("column_content").cast("string"), "''", "'"),
+        )
 
-#     if df is not None:
-#         result_df = df.withColumn(
-#             ddl_column, generate_table_comment_ddl("tokenized_table", "column_content")
-#         )
+    if df is not None:
+        result_df = df.withColumn(
+            ddl_column, generate_table_comment_ddl("tokenized_table", "column_content")
+        )
 
-#         if "column_content" in result_df.columns:
+        if "column_content" in result_df.columns:
 
-#             result_df = result_df.withColumn(
-#                 "column_content", col("column_content").cast("string")
-#             )
+            result_df = result_df.withColumn(
+                "column_content", col("column_content").cast("string")
+            )
 
-#         return result_df
-#     else:
-#         return df
+        return result_df
+    else:
+        return df
 
 
 def add_table_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame:
@@ -773,134 +771,134 @@ def add_column_ddl_to_pi_df(config, df: DataFrame, ddl_column: str) -> DataFrame
     return df
 
 
-# def df_to_sql_file(
-#     df: DataFrame,
-#     catalog_name: str,
-#     dest_schema_name: str,
-#     sql_column: str,
-#     filename: str,
-# ) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Writes a DataFrame to a SQL file using Spark-native operations (no collect()).
+def df_to_sql_file(
+    df: DataFrame,
+    catalog_name: str,
+    dest_schema_name: str,
+    sql_column: str,
+    filename: str,
+) -> str:
+    print(sys._getframe().f_code.co_name)
+    """
+    Writes a DataFrame to a SQL file using Spark-native operations (no collect()).
 
-#     Args:
-#         df (DataFrame): The DataFrame to write.
-#         catalog_name (str): The catalog name.
-#         dest_schema_name (str): The destination schema name.
-#         table_name (str): The table name.
-#         volume_name (str): The volume name.
-#         sql_column (str): The name of the SQL column.
-#         filename (str): The name of the file.
+    Args:
+        df (DataFrame): The DataFrame to write.
+        catalog_name (str): The catalog name.
+        dest_schema_name (str): The destination schema name.
+        table_name (str): The table name.
+        volume_name (str): The volume name.
+        sql_column (str): The name of the SQL column.
+        filename (str): The name of the file.
 
-#     Returns:
-#         str: The path to the SQL file.
-#     """
-#     print("Converting dataframe to SQL file using Spark-native operations...")
-#     selected_column_df = df.select(sql_column)
-#     uc_volume_path = f"/Volumes/{catalog_name}/{dest_schema_name}/{filename}.sql"
+    Returns:
+        str: The path to the SQL file.
+    """
+    print("Converting dataframe to SQL file using Spark-native operations...")
+    selected_column_df = df.select(sql_column)
+    uc_volume_path = f"/Volumes/{catalog_name}/{dest_schema_name}/{filename}.sql"
 
-#     temp_path = f"/Volumes/{catalog_name}/{dest_schema_name}/temp_{filename}"
-#     selected_column_df.coalesce(1).write.mode("overwrite").text(temp_path)
+    temp_path = f"/Volumes/{catalog_name}/{dest_schema_name}/temp_{filename}"
+    selected_column_df.coalesce(1).write.mode("overwrite").text(temp_path)
 
-#     part_files = [f for f in os.listdir(temp_path) if f.startswith("part-")]
-#     if part_files:
-#         shutil.move(os.path.join(temp_path, part_files[0]), uc_volume_path)
-#         shutil.rmtree(temp_path)
+    part_files = [f for f in os.listdir(temp_path) if f.startswith("part-")]
+    if part_files:
+        shutil.move(os.path.join(temp_path, part_files[0]), uc_volume_path)
+        shutil.rmtree(temp_path)
 
-#     return uc_volume_path
-
-
-# class DataFrameToExcelError(Exception):
-#     """Custom exception for DataFrame to Excel export errors."""
+    return uc_volume_path
 
 
-# def ensure_directory_exists(directory_path: str) -> None:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Ensures that the specified directory exists, creating it if necessary.
-
-#     Args:
-#         directory_path (str): The directory to check or create.
-
-#     Raises:
-#         DataFrameToExcelError: If directory creation fails.
-#     """
-#     try:
-#         if not os.path.exists(directory_path):
-#             os.mkdir(directory_path)
-#             logger.info(f"Created directory: {directory_path}")
-#     except Exception as e:
-#         logger.error(f"Failed to create directory {directory_path}: {e}")
-#         raise DataFrameToExcelError(f"Directory creation failed: {e}")
+class DataFrameToExcelError(Exception):
+    """Custom exception for DataFrame to Excel export errors."""
 
 
-# def df_column_to_excel_file(
-#     df: pd.DataFrame, filename: str, base_path: str, excel_column: str
-# ) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Exports a specified column from a DataFrame to an Excel file.
+def ensure_directory_exists(directory_path: str) -> None:
+    print(sys._getframe().f_code.co_name)
+    """
+    Ensures that the specified directory exists, creating it if necessary.
 
-#     Args:
-#         df (pd.DataFrame): The DataFrame to export.
-#         filename (str): The name of the output Excel file (without extension).
-#         volume_name (str): Volume name (used in path).
-#         excel_column (str): The column to export.
+    Args:
+        directory_path (str): The directory to check or create.
 
-#     Returns:
-#         str: The path to the created Excel file.
+    Raises:
+        DataFrameToExcelError: If directory creation fails.
+    """
+    try:
+        if not os.path.exists(directory_path):
+            os.mkdir(directory_path)
+            logger.info(f"Created directory: {directory_path}")
+    except Exception as e:
+        logger.error(f"Failed to create directory {directory_path}: {e}")
+        raise DataFrameToExcelError(f"Directory creation failed: {e}")
 
-#     Raises:
-#         DataFrameToExcelError: If export fails.
-#     """
-#     logger.info("Starting export of DataFrame column to Excel.")
-#     try:
-#         if excel_column not in df.columns:
-#             logger.error(f"Column '{excel_column}' not found in DataFrame.")
-#             raise DataFrameToExcelError(
-#                 f"Column '{excel_column}' does not exist in DataFrame."
-#             )
 
-#         output_dir = base_path
-#         ensure_directory_exists(output_dir)
-#         excel_file_path = os.path.join(output_dir, f"{filename}.xlsx")
-#         local_path = f"/local_disk0/tmp/{filename}.xlsx"
-#         df[[excel_column]].to_excel(local_path, index=False, engine="openpyxl")
+def df_column_to_excel_file(
+    df: pd.DataFrame, filename: str, base_path: str, excel_column: str
+) -> str:
+    print(sys._getframe().f_code.co_name)
+    """
+    Exports a specified column from a DataFrame to an Excel file.
 
-#         # Use Databricks SDK WorkspaceClient for UC volume compatibility
-#         try:
-#             from databricks.sdk import WorkspaceClient
+    Args:
+        df (pd.DataFrame): The DataFrame to export.
+        filename (str): The name of the output Excel file (without extension).
+        volume_name (str): Volume name (used in path).
+        excel_column (str): The column to export.
 
-#             w = WorkspaceClient()
+    Returns:
+        str: The path to the created Excel file.
 
-#             with open(local_path, "rb") as src_file:
-#                 excel_content = src_file.read()
+    Raises:
+        DataFrameToExcelError: If export fails.
+    """
+    logger.info("Starting export of DataFrame column to Excel.")
+    try:
+        if excel_column not in df.columns:
+            logger.error(f"Column '{excel_column}' not found in DataFrame.")
+            raise DataFrameToExcelError(
+                f"Column '{excel_column}' does not exist in DataFrame."
+            )
 
-#             # Upload using WorkspaceClient (handles UC volumes properly)
-#             w.files.upload(excel_file_path, excel_content, overwrite=True)
+        output_dir = base_path
+        ensure_directory_exists(output_dir)
+        excel_file_path = os.path.join(output_dir, f"{filename}.xlsx")
+        local_path = f"/local_disk0/tmp/{filename}.xlsx"
+        df[[excel_column]].to_excel(local_path, index=False, engine="openpyxl")
 
-#         except Exception:
-#             # Fallback to direct file write
-#             with open(local_path, "rb") as src_file:
-#                 with open(excel_file_path, "wb") as dest_file:
-#                     dest_file.write(src_file.read())
-#         logger.info(
-#             f"Successfully wrote column '{excel_column}' to Excel file: {excel_file_path}"
-#         )
+        # Use Databricks SDK WorkspaceClient for UC volume compatibility
+        try:
+            from databricks.sdk import WorkspaceClient
 
-#         if not os.path.isfile(excel_file_path):
-#             logger.error(f"Excel file was not created: {excel_file_path}")
-#             raise DataFrameToExcelError(
-#                 f"Excel file was not created: {excel_file_path}"
-#             )
+            w = WorkspaceClient()
 
-#         print(f"Excel file created at: {excel_file_path}")
-#         return excel_file_path
+            with open(local_path, "rb") as src_file:
+                excel_content = src_file.read()
 
-#     except Exception as e:
-#         logger.error(f"Error exporting DataFrame to Excel: {e}")
-#         raise DataFrameToExcelError(f"Failed to export DataFrame to Excel: {e}")
+            # Upload using WorkspaceClient (handles UC volumes properly)
+            w.files.upload(excel_file_path, excel_content, overwrite=True)
+
+        except Exception:
+            # Fallback to direct file write
+            with open(local_path, "rb") as src_file:
+                with open(excel_file_path, "wb") as dest_file:
+                    dest_file.write(src_file.read())
+        logger.info(
+            f"Successfully wrote column '{excel_column}' to Excel file: {excel_file_path}"
+        )
+
+        if not os.path.isfile(excel_file_path):
+            logger.error(f"Excel file was not created: {excel_file_path}")
+            raise DataFrameToExcelError(
+                f"Excel file was not created: {excel_file_path}"
+            )
+
+        print(f"Excel file created at: {excel_file_path}")
+        return excel_file_path
+
+    except Exception as e:
+        logger.error(f"Error exporting DataFrame to Excel: {e}")
+        raise DataFrameToExcelError(f"Failed to export DataFrame to Excel: {e}")
 
 
 def populate_log_table(df, config, current_user, base_path):
@@ -1115,35 +1113,35 @@ def mark_table_completed(table_name: str, config: MetadataConfig) -> None:
     print(f"Marked table {table_name} as completed")
 
 
-# def mark_table_failed(table_name: str, config: MetadataConfig, error_message: str = None) -> None:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Mark a table as failed in the control table.
+def mark_table_failed(table_name: str, config: MetadataConfig, error_message: str = None) -> None:
+    print(sys._getframe().f_code.co_name)
+    """
+    Mark a table as failed in the control table.
     
-#     Args:
-#         table_name (str): The fully qualified table name.
-#         config (MetadataConfig): Configuration object.
-#         error_message (str, optional): Error message describing the failure.
-#     """
-#     spark = SparkSession.builder.getOrCreate()
-#     formatted_control_table = get_control_table(config)
-#     control_table = (
-#         f"{config.catalog_name}.{config.schema_name}.{formatted_control_table}"
-#     )
+    Args:
+        table_name (str): The fully qualified table name.
+        config (MetadataConfig): Configuration object.
+        error_message (str, optional): Error message describing the failure.
+    """
+    spark = SparkSession.builder.getOrCreate()
+    formatted_control_table = get_control_table(config)
+    control_table = (
+        f"{config.catalog_name}.{config.schema_name}.{formatted_control_table}"
+    )
     
-#     # Escape single quotes in error message to prevent SQL injection
-#     safe_error = error_message.replace("'", "''") if error_message else None
-#     error_clause = f", _error_message = '{safe_error}'" if safe_error else ""
+    # Escape single quotes in error message to prevent SQL injection
+    safe_error = error_message.replace("'", "''") if error_message else None
+    error_clause = f", _error_message = '{safe_error}'" if safe_error else ""
     
-#     update_query = f"""
-#     UPDATE {control_table}
-#     SET _status = 'failed',
-#         _updated_at = current_timestamp(){error_clause}
-#     WHERE table_name = '{table_name}'
-#       AND _run_id = '{config.run_id}'
-#     """
-#     spark.sql(update_query)
-#     print(f"Marked table {table_name} as failed: {error_message or 'No error message'}")
+    update_query = f"""
+    UPDATE {control_table}
+    SET _status = 'failed',
+        _updated_at = current_timestamp(){error_clause}
+    WHERE table_name = '{table_name}'
+      AND _run_id = '{config.run_id}'
+    """
+    spark.sql(update_query)
+    print(f"Marked table {table_name} as failed: {error_message or 'No error message'}")
 
 
 def run_log_table_ddl(config):
@@ -1327,107 +1325,107 @@ def create_folder_if_not_exists(path: str) -> None:
         raise ExportError(f"Directory creation failed: {e}") from e
 
 
-# def export_df_to_excel(df: pd.DataFrame, output_file: str, export_folder: str) -> None:
-#     print(sys._getframe().f_code.co_name)
-#     try:
-#         local_path = f"/local_disk0/tmp/{output_file}"
-#         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-#         if not os.path.exists(local_path):
-#             df.to_excel(local_path, index=False)
-#         else:
-#             with pd.ExcelWriter(
-#                 local_path, engine="openpyxl", mode="a", if_sheet_exists="overlay"
-#             ) as writer:
-#                 df.to_excel(
-#                     writer,
-#                     sheet_name="Sheet1",
-#                     startrow=writer.sheets["Sheet1"].max_row,
-#                     header=False,
-#                     index=False,
-#                 )
-#         # Use Databricks SDK WorkspaceClient for UC volume compatibility
-#         volume_output_path = os.path.join(export_folder, output_file)
-#         try:
-#             from databricks.sdk import WorkspaceClient
+def export_df_to_excel(df: pd.DataFrame, output_file: str, export_folder: str) -> None:
+    print(sys._getframe().f_code.co_name)
+    try:
+        local_path = f"/local_disk0/tmp/{output_file}"
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        if not os.path.exists(local_path):
+            df.to_excel(local_path, index=False)
+        else:
+            with pd.ExcelWriter(
+                local_path, engine="openpyxl", mode="a", if_sheet_exists="overlay"
+            ) as writer:
+                df.to_excel(
+                    writer,
+                    sheet_name="Sheet1",
+                    startrow=writer.sheets["Sheet1"].max_row,
+                    header=False,
+                    index=False,
+                )
+        # Use Databricks SDK WorkspaceClient for UC volume compatibility
+        volume_output_path = os.path.join(export_folder, output_file)
+        try:
+            from databricks.sdk import WorkspaceClient
 
-#             w = WorkspaceClient()
+            w = WorkspaceClient()
 
-#             with open(local_path, "rb") as src_file:
-#                 excel_content = src_file.read()
+            with open(local_path, "rb") as src_file:
+                excel_content = src_file.read()
 
-#             # Upload using WorkspaceClient (handles UC volumes properly)
-#             w.files.upload(volume_output_path, excel_content, overwrite=True)
+            # Upload using WorkspaceClient (handles UC volumes properly)
+            w.files.upload(volume_output_path, excel_content, overwrite=True)
 
-#         except Exception:
-#             # Fallback to direct file write
-#             with open(local_path, "rb") as src_file:
-#                 with open(volume_output_path, "wb") as dest_file:
-#                     dest_file.write(src_file.read())
-#         logger.info(f"Excel file created at: {output_file}")
-#     except Exception as e:
-#         logger.error(f"Failed to export DataFrame to Excel: {e}")
-#         raise ExportError(f"Failed to export DataFrame to Excel: {e}")
+        except Exception:
+            # Fallback to direct file write
+            with open(local_path, "rb") as src_file:
+                with open(volume_output_path, "wb") as dest_file:
+                    dest_file.write(src_file.read())
+        logger.info(f"Excel file created at: {output_file}")
+    except Exception as e:
+        logger.error(f"Failed to export DataFrame to Excel: {e}")
+        raise ExportError(f"Failed to export DataFrame to Excel: {e}")
 
 
-# def _export_table_to_excel(df: Any, config: Any) -> str:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Reads a table from Databricks, writes it as an Excel file to a volume, and drops the original table.
+def _export_table_to_excel(df: Any, config: Any) -> str:
+    print(sys._getframe().f_code.co_name)
+    """
+    Reads a table from Databricks, writes it as an Excel file to a volume, and drops the original table.
 
-#     Args:
-#         df: DataFrame to export (Spark or pandas)
-#         config: Configuration object containing catalog_name, schema_name, mode, current_user, and volume_name
+    Args:
+        df: DataFrame to export (Spark or pandas)
+        config: Configuration object containing catalog_name, schema_name, mode, current_user, and volume_name
 
-#     Returns:
-#         str: The path to the Excel file if successful
+    Returns:
+        str: The path to the Excel file if successful
 
-#     Raises:
-#         ExportError: If export fails
-#     """
-#     date = datetime.now().strftime("%Y%m%d")
-#     if not hasattr(config, "log_timestamp") or not config.log_timestamp:
-#         config.log_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-#     timestamp = config.log_timestamp
+    Raises:
+        ExportError: If export fails
+    """
+    date = datetime.now().strftime("%Y%m%d")
+    if not hasattr(config, "log_timestamp") or not config.log_timestamp:
+        config.log_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = config.log_timestamp
 
-#     try:
-#         # Use unique temp table name for concurrent job safety
-#         table_name = config.get_temp_metadata_log_table_name()
-#         volume_path = (
-#             f"/Volumes/{config.catalog_name}/{config.schema_name}/{config.volume_name}"
-#         )
-#         export_folder = f"{volume_path}/{current_user}/{date}/exportable_run_logs/"
-#         create_folder_if_not_exists(export_folder)
-#         output_filename = f"review_metadata_{config.mode}_{config.log_timestamp}.xlsx"
-#         output_file = f"{export_folder}{output_filename}"
+    try:
+        # Use unique temp table name for concurrent job safety
+        table_name = config.get_temp_metadata_log_table_name()
+        volume_path = (
+            f"/Volumes/{config.catalog_name}/{config.schema_name}/{config.volume_name}"
+        )
+        export_folder = f"{volume_path}/{current_user}/{date}/exportable_run_logs/"
+        create_folder_if_not_exists(export_folder)
+        output_filename = f"review_metadata_{config.mode}_{config.log_timestamp}.xlsx"
+        output_file = f"{export_folder}{output_filename}"
 
-#         if hasattr(df, "count") and callable(df.count):
-#             if df.count() == 0:
-#                 print("Warning: Table is empty")
-#                 logger.warning("Table is empty")
-#         elif isinstance(df, pd.DataFrame) and df.empty:
-#             print("Warning: Table is empty")
-#             logger.warning("Table is empty")
+        if hasattr(df, "count") and callable(df.count):
+            if df.count() == 0:
+                print("Warning: Table is empty")
+                logger.warning("Table is empty")
+        elif isinstance(df, pd.DataFrame) and df.empty:
+            print("Warning: Table is empty")
+            logger.warning("Table is empty")
 
-#         if hasattr(df, "toPandas") and callable(df.toPandas):
-#             pdf = df.toPandas()
-#         elif isinstance(df, pd.DataFrame):
-#             pdf = df
-#         else:
-#             logger.error("Unsupported DataFrame type")
-#             raise ExportError("Unsupported DataFrame type")
+        if hasattr(df, "toPandas") and callable(df.toPandas):
+            pdf = df.toPandas()
+        elif isinstance(df, pd.DataFrame):
+            pdf = df
+        else:
+            logger.error("Unsupported DataFrame type")
+            raise ExportError("Unsupported DataFrame type")
 
-#         print(f"Writing to Excel file: {output_filename}")
-#         logger.info(f"Writing to Excel file: {output_filename}")
-#         export_df_to_excel(pdf, output_filename, export_folder)
+        print(f"Writing to Excel file: {output_filename}")
+        logger.info(f"Writing to Excel file: {output_filename}")
+        export_df_to_excel(pdf, output_filename, export_folder)
 
-#         print("Export completed successfully")
-#         logger.info("Export completed successfully")
-#         return output_file
+        print("Export completed successfully")
+        logger.info("Export completed successfully")
+        return output_file
 
-#     except Exception as e:
-#         print(f"Error during full log export process: {str(e)}")
-#         logger.error(f"Error during full log export process: {str(e)}")
-#         raise ExportError(f"Error during full log export process: {str(e)}")
+    except Exception as e:
+        print(f"Error during full log export process: {str(e)}")
+        logger.error(f"Error during full log export process: {str(e)}")
+        raise ExportError(f"Error during full log export process: {str(e)}")
 
 
 def log_metadata_generation(
@@ -1448,15 +1446,15 @@ def log_metadata_generation(
     mark_as_deleted(table_name, config)
 
 
-# # TODO: Figure out where this is used and if it is needed
-# def set_classification_to_null(df: DataFrame, config: MetadataConfig) -> DataFrame:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Set the classification to null.
-#     """
-#     if config.mode == "pi":
-#         df = df.withColumn("classification", lit(None))
-#     return df
+# TODO: Figure out where this is used and if it is needed
+def set_classification_to_null(df: DataFrame, config: MetadataConfig) -> DataFrame:
+    print(sys._getframe().f_code.co_name)
+    """
+    Set the classification to null.
+    """
+    if config.mode == "pi":
+        df = df.withColumn("classification", lit(None))
+    return df
 
 
 def set_protected_classification(df: DataFrame, config: MetadataConfig) -> DataFrame:
@@ -1545,8 +1543,7 @@ def filter_and_write_ddl(
     finally:
         log_metadata_generation(df, config, full_table_name, base_path)
         if config.reviewable_output_format == "excel":
-            # _export_table_to_excel(df, config)
-            print("excel")
+            _export_table_to_excel(df, config)
         elif config.reviewable_output_format == "tsv":
             _export_table_to_tsv(df, config)
         else:
@@ -1597,35 +1594,35 @@ def write_ddl_to_volume_spark_native(
         ddl_list = [row.ddl for row in ddl_statements]
 
         pdf = pd.DataFrame(ddl_list, columns=["ddl"])
-        # df_column_to_excel_file(pdf, file_name, base_path, "ddl")
+        df_column_to_excel_file(pdf, file_name, base_path, "ddl")
     else:
         raise ValueError(
             "Invalid output format. Please choose either 'sql', 'tsv' or 'excel'."
         )
 
 
-# def write_ddl_to_volume(file_name, base_path, ddl_statements, output_format):
-#     print(sys._getframe().f_code.co_name)
-#     """Legacy function kept for backward compatibility"""
-#     try:
-#         create_folder_if_not_exists(base_path)
-#     except Exception as e:
-#         print(
-#             f"Error creating folder: {e}. Check if Volume exists and if your permissions are correct."
-#         )
-#     if output_format in ["sql", "tsv"]:
-#         full_path = os.path.join(base_path, f"{file_name}.{output_format}")
-#         with open(full_path, "w") as file:
-#             for statement in ddl_statements:
-#                 file.write(f"{statement[0]}\n")
-#     elif output_format == "excel":
-#         ddl_list = [row.ddl for row in ddl_statements]
-#         df = pd.DataFrame(ddl_list, columns=["ddl"])
-#         df_column_to_excel_file(df, file_name, base_path, "ddl")
-#     else:
-#         raise ValueError(
-#             "Invalid output format. Please choose either 'sql', 'tsv' or 'excel'."
-#         )
+def write_ddl_to_volume(file_name, base_path, ddl_statements, output_format):
+    print(sys._getframe().f_code.co_name)
+    """Legacy function kept for backward compatibility"""
+    try:
+        create_folder_if_not_exists(base_path)
+    except Exception as e:
+        print(
+            f"Error creating folder: {e}. Check if Volume exists and if your permissions are correct."
+        )
+    if output_format in ["sql", "tsv"]:
+        full_path = os.path.join(base_path, f"{file_name}.{output_format}")
+        with open(full_path, "w") as file:
+            for statement in ddl_statements:
+                file.write(f"{statement[0]}\n")
+    elif output_format == "excel":
+        ddl_list = [row.ddl for row in ddl_statements]
+        df = pd.DataFrame(ddl_list, columns=["ddl"])
+        df_column_to_excel_file(df, file_name, base_path, "ddl")
+    else:
+        raise ValueError(
+            "Invalid output format. Please choose either 'sql', 'tsv' or 'excel'."
+        )
 
 
 def create_and_persist_ddl(
@@ -1868,81 +1865,81 @@ def create_and_persist_ddl(
         log_metadata_generation(column_df, config, table_name, base_path)
 
 
-# # TODO: Update this to use get_generated_metadata_data_unaware() if sample size is 0 so Presidio can still use data.
-# def get_domain_classification(
-#     config: MetadataConfig, full_table_name: str
-# ) -> Dict[str, Any]:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Generates domain classification for a given table.
+# TODO: Update this to use get_generated_metadata_data_unaware() if sample size is 0 so Presidio can still use data.
+def get_domain_classification(
+    config: MetadataConfig, full_table_name: str
+) -> Dict[str, Any]:
+    print(sys._getframe().f_code.co_name)
+    """
+    Generates domain classification for a given table.
 
-#     Note: Domain classification only uses the first N columns (defined by columns_per_call)
-#     to avoid massive prompts. In testing, along with table comments this is typically sufficient to determine business domain.
+    Note: Domain classification only uses the first N columns (defined by columns_per_call)
+    to avoid massive prompts. In testing, along with table comments this is typically sufficient to determine business domain.
 
-#     Args:
-#         config: Configuration object
-#         full_table_name: Full table name (catalog.schema.table)
+    Args:
+        config: Configuration object
+        full_table_name: Full table name (catalog.schema.table)
 
-#     Returns:
-#         Dict containing domain classification results
-#     """
+    Returns:
+        Dict containing domain classification results
+    """
 
-#     spark = SparkSession.builder.getOrCreate()
+    spark = SparkSession.builder.getOrCreate()
 
-#     domain_config = load_domain_config(config.domain_config_path)
+    domain_config = load_domain_config(config.domain_config_path)
 
-#     # Use SQL-based reading with type conversion to handle VARIANT in Spark Connect
-#     df = read_table_with_type_conversion(spark, full_table_name)
-#     total_columns = len(df.columns)
+    # Use SQL-based reading with type conversion to handle VARIANT in Spark Connect
+    df = read_table_with_type_conversion(spark, full_table_name)
+    total_columns = len(df.columns)
 
-#     # Limit columns for domain classification to avoid massive prompts
-#     # Use only the first chunk of columns (defined by columns_per_call)
-#     chunked_dfs = chunk_df(df, config.columns_per_call)
-#     first_chunk_df = chunked_dfs[0] if chunked_dfs else df
-#     columns_used = len(first_chunk_df.columns)
+    # Limit columns for domain classification to avoid massive prompts
+    # Use only the first chunk of columns (defined by columns_per_call)
+    chunked_dfs = chunk_df(df, config.columns_per_call)
+    first_chunk_df = chunked_dfs[0] if chunked_dfs else df
+    columns_used = len(first_chunk_df.columns)
 
-#     logger.info(
-#         f"Domain classification for {full_table_name}: Using {columns_used}/{total_columns} columns (limited by columns_per_call={config.columns_per_call})"
-#     )
+    logger.info(
+        f"Domain classification for {full_table_name}: Using {columns_used}/{total_columns} columns (limited by columns_per_call={config.columns_per_call})"
+    )
 
-#     # Sample rows from the limited column set
-#     sampled_df = sample_df(first_chunk_df, first_chunk_df.count(), config.sample_size)
+    # Sample rows from the limited column set
+    sampled_df = sample_df(first_chunk_df, first_chunk_df.count(), config.sample_size)
 
-#     prompt = PromptFactory.create_prompt(config, sampled_df, full_table_name)
-#     prompt_messages = prompt.create_prompt_template()
+    prompt = PromptFactory.create_prompt(config, sampled_df, full_table_name)
+    prompt_messages = prompt.create_prompt_template()
 
-#     # Check prompt length to avoid excessive token usage
-#     check_token_length_against_num_words(prompt_messages, config)
+    # Check prompt length to avoid excessive token usage
+    check_token_length_against_num_words(prompt_messages, config)
 
-#     table_metadata = {
-#         "column_contents": prompt.prompt_content.get("column_contents", {}),
-#     }
+    table_metadata = {
+        "column_contents": prompt.prompt_content.get("column_contents", {}),
+    }
 
-#     if config.add_metadata:
-#         table_metadata["column_metadata"] = prompt.prompt_content.get(
-#             "column_contents", {}
-#         ).get("column_metadata", {})
-#         table_metadata["table_tags"] = prompt.prompt_content.get(
-#             "column_contents", {}
-#         ).get("table_tags", "")
-#         table_metadata["table_constraints"] = prompt.prompt_content.get(
-#             "column_contents", {}
-#         ).get("table_constraints", "")
-#         table_metadata["table_comments"] = prompt.prompt_content.get(
-#             "column_contents", {}
-#         ).get("table_comments", "")
+    if config.add_metadata:
+        table_metadata["column_metadata"] = prompt.prompt_content.get(
+            "column_contents", {}
+        ).get("column_metadata", {})
+        table_metadata["table_tags"] = prompt.prompt_content.get(
+            "column_contents", {}
+        ).get("table_tags", "")
+        table_metadata["table_constraints"] = prompt.prompt_content.get(
+            "column_contents", {}
+        ).get("table_constraints", "")
+        table_metadata["table_comments"] = prompt.prompt_content.get(
+            "column_contents", {}
+        ).get("table_comments", "")
 
-#     # Classify the table
-#     classification_result = classify_table_domain(
-#         table_name=full_table_name,
-#         table_metadata=table_metadata,
-#         domain_config=domain_config,
-#         model_endpoint=config.model,
-#         temperature=config.temperature,
-#         max_tokens=config.max_tokens,
-#     )
+    # Classify the table
+    classification_result = classify_table_domain(
+        table_name=full_table_name,
+        table_metadata=table_metadata,
+        domain_config=domain_config,
+        model_endpoint=config.model,
+        temperature=config.temperature,
+        max_tokens=config.max_tokens,
+    )
 
-#     return classification_result
+    return classification_result
 
 
 def get_generated_metadata(
@@ -2009,8 +2006,7 @@ def get_generated_metadata_data_aware(
         prompt_messages = prompt.create_prompt_template()
         check_token_length_against_num_words(prompt_messages, config)
         if config.registered_model_name != "default":
-            # chat_response = call_registered_model(config)
-            print("default")
+            chat_response = call_registered_model(config)
         else:
             chat_response = MetadataGeneratorFactory.create_generator(config)
         response, _ = chat_response.get_responses(
@@ -2057,25 +2053,25 @@ def review_and_generate_metadata(
     table_rows = []
     column_rows = []
 
-    # if config.mode == "domain":
-    #     domain_result = get_domain_classification(config, full_table_name)
-    #     tokenized_full_table_name = replace_catalog_name(config, full_table_name)
-    #     table_rows = append_domain_table_row(
-    #         table_rows,
-    #         full_table_name,
-    #         domain_result,
-    #         tokenized_full_table_name,
-    #     )
-    #     return rows_to_df(column_rows, config), rows_to_df(table_rows, config)
+    if config.mode == "domain":
+        domain_result = get_domain_classification(config, full_table_name)
+        tokenized_full_table_name = replace_catalog_name(config, full_table_name)
+        table_rows = append_domain_table_row(
+            table_rows,
+            full_table_name,
+            domain_result,
+            tokenized_full_table_name,
+        )
+        return rows_to_df(column_rows, config), rows_to_df(table_rows, config)
 
     # Standard flow for comment and pi modes
     responses = get_generated_metadata(config, full_table_name)
     for response in responses:
         tokenized_full_table_name = replace_catalog_name(config, full_table_name)
-        # if config.mode == "comment":
-        #     table_rows = append_table_row(
-        #         table_rows, full_table_name, response, tokenized_full_table_name
-        #     )
+        if config.mode == "comment":
+            table_rows = append_table_row(
+                table_rows, full_table_name, response, tokenized_full_table_name
+            )
         column_rows = append_column_rows(
             config, column_rows, full_table_name, response, tokenized_full_table_name
         )
@@ -2111,106 +2107,106 @@ def replace_catalog_name(config, full_table_name):
     return f"{replaced_catalog_name}.{schema_name}.{table_name}"
 
 
-# def log_missing_governance_tags(error_msg: str, ddl_statement: str) -> None:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Log the missing governance tags.
-#     """
+def log_missing_governance_tags(error_msg: str, ddl_statement: str) -> None:
+    print(sys._getframe().f_code.co_name)
+    """
+    Log the missing governance tags.
+    """
 
-#     missing_tags = []
-#     failed_statements = []
+    missing_tags = []
+    failed_statements = []
 
-#     if "TAG_NOT_FOUND" in error_msg or "tag" in error_msg.lower():
-#         if "SET TAGS" in ddl_statement:
+    if "TAG_NOT_FOUND" in error_msg or "tag" in error_msg.lower():
+        if "SET TAGS" in ddl_statement:
 
-#             tag_pattern = r"'(\w+)'\s*="
-#             tags = re.findall(tag_pattern, ddl_statement)
-#             for tag in tags:
-#                 if tag not in missing_tags:
-#                     missing_tags.append(tag)
-#             print(f"  Missing governance tags detected: {', '.join(tags)}")
-#             print(f"   Statement: {ddl_statement}")
-#             failed_statements.append(
-#                 {
-#                     "statement": ddl_statement,
-#                     "error": "Missing governance tags",
-#                     "tags": tags,
-#                 }
-#             )
-#         else:
-#             print(f"  Error applying DDL: {ddl_statement}")
-#             failed_statements.append({"statement": ddl_statement, "error": error_msg})
-#     else:
-#         print(f" Error applying DDL: {error_msg}")
-#         failed_statements.append({"statement": ddl_statement, "error": error_msg})
-#     return missing_tags, failed_statements
+            tag_pattern = r"'(\w+)'\s*="
+            tags = re.findall(tag_pattern, ddl_statement)
+            for tag in tags:
+                if tag not in missing_tags:
+                    missing_tags.append(tag)
+            print(f"  Missing governance tags detected: {', '.join(tags)}")
+            print(f"   Statement: {ddl_statement}")
+            failed_statements.append(
+                {
+                    "statement": ddl_statement,
+                    "error": "Missing governance tags",
+                    "tags": tags,
+                }
+            )
+        else:
+            print(f"  Error applying DDL: {ddl_statement}")
+            failed_statements.append({"statement": ddl_statement, "error": error_msg})
+    else:
+        print(f" Error applying DDL: {error_msg}")
+        failed_statements.append({"statement": ddl_statement, "error": error_msg})
+    return missing_tags, failed_statements
 
 
-# def apply_comment_ddl(df: DataFrame, config: MetadataConfig) -> dict:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Applies the comment DDL statements stored in the DataFrame to the table.
+def apply_comment_ddl(df: DataFrame, config: MetadataConfig) -> dict:
+    print(sys._getframe().f_code.co_name)
+    """
+    Applies the comment DDL statements stored in the DataFrame to the table.
 
-#     Args:
-#         df (DataFrame): The DataFrame containing the DDL statements.
+    Args:
+        df (DataFrame): The DataFrame containing the DDL statements.
 
-#     Returns:
-#         dict: Summary of DDL application including any missing tags
-#     """
-#     spark = SparkSession.builder.getOrCreate()
-#     ddl_statements = df.select("ddl").collect()
-#     missing_tags = []
-#     failed_statements = []
-#     success_count = 0
+    Returns:
+        dict: Summary of DDL application including any missing tags
+    """
+    spark = SparkSession.builder.getOrCreate()
+    ddl_statements = df.select("ddl").collect()
+    missing_tags = []
+    failed_statements = []
+    success_count = 0
 
-#     for row in ddl_statements:
-#         # Security: DDL statements may contain sensitive data in comments/tags
-#         # Log only metadata, not full DDL content
-#         ddl_statement = row["ddl"]
-#         logger.debug("Applying DDL statement (%d characters)", len(ddl_statement))
+    for row in ddl_statements:
+        # Security: DDL statements may contain sensitive data in comments/tags
+        # Log only metadata, not full DDL content
+        ddl_statement = row["ddl"]
+        logger.debug("Applying DDL statement (%d characters)", len(ddl_statement))
 
-#         if not config.dry_run:
-#             try:
-#                 spark.sql(ddl_statement)
-#                 success_count += 1
-#                 print(
-#                     f"Applied DDL statement successfully ({len(ddl_statement)} chars)"
-#                 )
-#             except Exception as e:
-#                 # Extract concise error message
-#                 concise_error = extract_concise_error(e)
-#                 logger.error("Error applying DDL: %s", concise_error)
-#                 print(f"Failed to apply DDL statement: {concise_error}")
-#                 # Security: Only log DDL structure, not full content (may contain sensitive data in comments)
-#                 logger.debug(
-#                     "DDL statement first 100 chars: %s...", ddl_statement[:100]
-#                 )
+        if not config.dry_run:
+            try:
+                spark.sql(ddl_statement)
+                success_count += 1
+                print(
+                    f"Applied DDL statement successfully ({len(ddl_statement)} chars)"
+                )
+            except Exception as e:
+                # Extract concise error message
+                concise_error = extract_concise_error(e)
+                logger.error("Error applying DDL: %s", concise_error)
+                print(f"Failed to apply DDL statement: {concise_error}")
+                # Security: Only log DDL structure, not full content (may contain sensitive data in comments)
+                logger.debug(
+                    "DDL statement first 100 chars: %s...", ddl_statement[:100]
+                )
 
-#                 # Track failed tags for summary
-#                 if "Tag policy violation" in concise_error:
-#                     match = re.search(
-#                         r"'(\w+)' cannot be set to '(\S+)'", concise_error
-#                     )
-#                     if match:
-#                         tag_key, tag_value = match.groups()
-#                         missing_tags.append(f"{tag_key}={tag_value}")
+                # Track failed tags for summary
+                if "Tag policy violation" in concise_error:
+                    match = re.search(
+                        r"'(\w+)' cannot be set to '(\S+)'", concise_error
+                    )
+                    if match:
+                        tag_key, tag_value = match.groups()
+                        missing_tags.append(f"{tag_key}={tag_value}")
 
-#                 failed_statements.append(
-#                     {"statement": ddl_statement, "error": concise_error}
-#                 )
+                failed_statements.append(
+                    {"statement": ddl_statement, "error": concise_error}
+                )
 
-#     if missing_tags:
-#         logger.warning(
-#             "Failed to set the following tags due to tag policy restrictions: %s",
-#             ", ".join(missing_tags),
-#         )
+    if missing_tags:
+        logger.warning(
+            "Failed to set the following tags due to tag policy restrictions: %s",
+            ", ".join(missing_tags),
+        )
 
-#     return {
-#         "success_count": success_count,
-#         "failed_count": len(failed_statements),
-#         "missing_tags": missing_tags,
-#         "failed_statements": failed_statements,
-#     }
+    return {
+        "success_count": success_count,
+        "failed_count": len(failed_statements),
+        "missing_tags": missing_tags,
+        "failed_statements": failed_statements,
+    }
 
 
 def split_and_hardcode_df(df, config):
@@ -2329,27 +2325,27 @@ def add_ddl_to_dfs(config, table_df, column_df, table_name):
         dict: A dictionary containing the DataFrames.
     """
     dfs = {}
-    # if config.mode == "comment":
+    if config.mode == "comment":
 
-    #     if table_df is not None:
-    #         summarized_table_df = summarize_table_content(table_df, config, table_name)
-    #         summarized_table_df = split_name_for_df(summarized_table_df)
-    #     else:
-    #         summarized_table_df = None
+        if table_df is not None:
+            summarized_table_df = summarize_table_content(table_df, config, table_name)
+            summarized_table_df = split_name_for_df(summarized_table_df)
+        else:
+            summarized_table_df = None
 
-    #     if column_df is not None and "column_content" in column_df.columns:
-    #         column_df = column_df.withColumn(
-    #             "column_content", col("column_content").cast("string")
-    #         )
+        if column_df is not None and "column_content" in column_df.columns:
+            column_df = column_df.withColumn(
+                "column_content", col("column_content").cast("string")
+            )
 
-    #     dfs["comment_table_df"] = add_ddl_to_table_comment_df(
-    #         summarized_table_df, "ddl"
-    #     )
-    #     dfs["comment_column_df"] = add_ddl_to_column_comment_df(column_df, "ddl")
+        dfs["comment_table_df"] = add_ddl_to_table_comment_df(
+            summarized_table_df, "ddl"
+        )
+        dfs["comment_column_df"] = add_ddl_to_column_comment_df(column_df, "ddl")
 
-    #     if config.apply_ddl:
-    #         dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
-    if config.mode == "pi":
+        if config.apply_ddl:
+            dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
+    elif config.mode == "pi":
         dfs["pi_column_df"] = add_column_ddl_to_pi_df(config, column_df, "ddl")
         table_df = create_pi_table_df(dfs["pi_column_df"], table_name, config)
         if table_df is not None:
@@ -2360,169 +2356,169 @@ def add_ddl_to_dfs(config, table_df, column_df, table_name):
             logger.error(
                 "[DEBUG] WARNING: table_df is None! No table-level DDL will be generated!"
             )
-        # if config.apply_ddl:
-        #     dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
-    # elif config.mode == "domain":
-    #     if table_df is not None:
-    #         table_df = add_ddl_to_domain_table_df(table_df, "ddl", config)
-    #         dfs["domain_table_df"] = table_df
-    #     else:
-    #         logger.error(
-    #             "[DEBUG] WARNING: table_df is None! No domain DDL will be generated!"
-    #         )
-    #     dfs["domain_column_df"] = None
-    #     if config.apply_ddl:
-    #         dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
+        if config.apply_ddl:
+            dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
+    elif config.mode == "domain":
+        if table_df is not None:
+            table_df = add_ddl_to_domain_table_df(table_df, "ddl", config)
+            dfs["domain_table_df"] = table_df
+        else:
+            logger.error(
+                "[DEBUG] WARNING: table_df is None! No domain DDL will be generated!"
+            )
+        dfs["domain_column_df"] = None
+        if config.apply_ddl:
+            dfs["ddl_results"] = apply_ddl_to_tables(dfs, config)
     else:
         raise ValueError("Invalid mode. Use 'pi', 'comment', or 'domain'.")
     return dfs
 
 
-# def add_ddl_to_domain_table_df(
-#     table_df: DataFrame, ddl_col_name: str, config
-# ) -> DataFrame:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Adds DDL statements to domain classification DataFrame.
+def add_ddl_to_domain_table_df(
+    table_df: DataFrame, ddl_col_name: str, config
+) -> DataFrame:
+    print(sys._getframe().f_code.co_name)
+    """
+    Adds DDL statements to domain classification DataFrame.
 
-#     Args:
-#         table_df (DataFrame): The DataFrame containing domain classifications.
-#         ddl_col_name (str): The name of the DDL column to add.
-#         config: Configuration object with tag names.
+    Args:
+        table_df (DataFrame): The DataFrame containing domain classifications.
+        ddl_col_name (str): The name of the DDL column to add.
+        config: Configuration object with tag names.
 
-#     Returns:
-#         DataFrame: The DataFrame with DDL statements added.
-#     """
-#     if table_df is None:
-#         return None
+    Returns:
+        DataFrame: The DataFrame with DDL statements added.
+    """
+    if table_df is None:
+        return None
 
-#     if "domain" in table_df.columns:
-#         table_df = table_df.withColumn("domain", col("domain").cast("string"))
-#     if "subdomain" in table_df.columns:
-#         table_df = table_df.withColumn("subdomain", col("subdomain").cast("string"))
+    if "domain" in table_df.columns:
+        table_df = table_df.withColumn("domain", col("domain").cast("string"))
+    if "subdomain" in table_df.columns:
+        table_df = table_df.withColumn("subdomain", col("subdomain").cast("string"))
 
-#     generate_domain_ddl = udf(_create_table_domain_ddl_func(config), StringType())
+    generate_domain_ddl = udf(_create_table_domain_ddl_func(config), StringType())
 
-#     result_df = table_df.withColumn(
-#         ddl_col_name,
-#         generate_domain_ddl("tokenized_table", "domain", "subdomain"),
-#     )
+    result_df = table_df.withColumn(
+        ddl_col_name,
+        generate_domain_ddl("tokenized_table", "domain", "subdomain"),
+    )
 
-#     # Keep column_content for logging purposes
-#     if "column_content" in result_df.columns:
-#         result_df = result_df.withColumn(
-#             "column_content", col("column_content").cast("string")
-#         )
+    # Keep column_content for logging purposes
+    if "column_content" in result_df.columns:
+        result_df = result_df.withColumn(
+            "column_content", col("column_content").cast("string")
+        )
 
-#     return result_df
-
-
-# def apply_ddl_to_tables(dfs, config):
-#     """
-#     Applies DDL to the tables.
-
-#     Args:
-#         dfs (DataFrame): The DataFrame containing the DDL statements.
-#         config (MetadataConfig): The configuration object.
-
-#     Returns:
-#         dict: Summary of DDL application results
-#     """
-#     print(sys._getframe().f_code.co_name)
-#     table_df = dfs.get(f"{config.mode}_table_df")
-#     column_df = dfs.get(f"{config.mode}_column_df")
-
-#     results = {"table_results": {}, "column_results": {}, "all_missing_tags": []}
-
-#     if table_df is not None:
-#         results["table_results"] = apply_comment_ddl(table_df, config)
-#         if results["table_results"]["missing_tags"]:
-#             results["all_missing_tags"].extend(results["table_results"]["missing_tags"])
-
-#     if column_df is not None:
-#         results["column_results"] = apply_comment_ddl(column_df, config)
-#         if results["column_results"]["missing_tags"]:
-#             for tag in results["column_results"]["missing_tags"]:
-#                 if tag not in results["all_missing_tags"]:
-#                     results["all_missing_tags"].append(tag)
-
-#     print_ddl_summary(results, config)
-
-#     return results
+    return result_df
 
 
-# def print_ddl_summary(results, config):
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Prints a formatted summary of DDL application results.
+def apply_ddl_to_tables(dfs, config):
+    """
+    Applies DDL to the tables.
 
-#     Args:
-#         results (dict): Results dictionary from apply_ddl_to_tables
-#         config (MetadataConfig): Configuration object
-#     """
-#     print("\n" + "=" * 80)
-#     print("DDL APPLICATION SUMMARY")
-#     print("=" * 80)
+    Args:
+        dfs (DataFrame): The DataFrame containing the DDL statements.
+        config (MetadataConfig): The configuration object.
 
-#     total_success = 0
-#     total_failed = 0
+    Returns:
+        dict: Summary of DDL application results
+    """
+    print(sys._getframe().f_code.co_name)
+    table_df = dfs.get(f"{config.mode}_table_df")
+    column_df = dfs.get(f"{config.mode}_column_df")
 
-#     if results["table_results"]:
-#         total_success += results["table_results"]["success_count"]
-#         total_failed += results["table_results"]["failed_count"]
-#         print(
-#             f"Table DDL: {results['table_results']['success_count']} succeeded, {results['table_results']['failed_count']} failed"
-#         )
+    results = {"table_results": {}, "column_results": {}, "all_missing_tags": []}
 
-#     if results["column_results"]:
-#         total_success += results["column_results"]["success_count"]
-#         total_failed += results["column_results"]["failed_count"]
-#         print(
-#             f"Column DDL: {results['column_results']['success_count']} succeeded, {results['column_results']['failed_count']} failed"
-#         )
+    if table_df is not None:
+        results["table_results"] = apply_comment_ddl(table_df, config)
+        if results["table_results"]["missing_tags"]:
+            results["all_missing_tags"].extend(results["table_results"]["missing_tags"])
 
-#     print(f"\nTotal: {total_success} succeeded, {total_failed} failed")
+    if column_df is not None:
+        results["column_results"] = apply_comment_ddl(column_df, config)
+        if results["column_results"]["missing_tags"]:
+            for tag in results["column_results"]["missing_tags"]:
+                if tag not in results["all_missing_tags"]:
+                    results["all_missing_tags"].append(tag)
 
-#     # Show failures
-#     if total_failed > 0:
-#         print("\n" + "-" * 80)
-#         print("FAILED DDL STATEMENTS:")
-#         print("-" * 80)
+    print_ddl_summary(results, config)
 
-#         if results["table_results"] and results["table_results"]["failed_statements"]:
-#             for i, fail in enumerate(results["table_results"]["failed_statements"], 1):
-#                 # Security: Do not print full DDL (may contain sensitive data in comments)
-#                 stmt_preview = (
-#                     fail["statement"][:100] + "..."
-#                     if len(fail["statement"]) > 100
-#                     else fail["statement"]
-#                 )
-#                 print(f"\n#{i} Statement preview: {stmt_preview}")
-#                 print(f"Error: {fail['error'][:200]}...")  # Truncate long errors
+    return results
 
-#         if results["column_results"] and results["column_results"]["failed_statements"]:
-#             for i, fail in enumerate(results["column_results"]["failed_statements"], 1):
-#                 # Security: Do not print full DDL (may contain sensitive data in comments)
-#                 stmt_preview = (
-#                     fail["statement"][:100] + "..."
-#                     if len(fail["statement"]) > 100
-#                     else fail["statement"]
-#                 )
-#                 print(f"\n#{i} Statement preview: {stmt_preview}")
-#                 print(f"Error: {fail['error'][:200]}...")
 
-#     # Show missing tags
-#     if results["all_missing_tags"]:
-#         print("\n" + "-" * 80)
-#         print("MISSING GOVERNANCE TAGS:")
-#         print("-" * 80)
-#         for tag in results["all_missing_tags"]:
-#             print(f"  - {tag}")
-#         print("\nTo create these tags, run:")
-#         for tag in results["all_missing_tags"]:
-#             print(f"  CREATE TAG {config.catalog_name}.{tag};")
+def print_ddl_summary(results, config):
+    print(sys._getframe().f_code.co_name)
+    """
+    Prints a formatted summary of DDL application results.
 
-#     print("=" * 80 + "\n")
+    Args:
+        results (dict): Results dictionary from apply_ddl_to_tables
+        config (MetadataConfig): Configuration object
+    """
+    print("\n" + "=" * 80)
+    print("DDL APPLICATION SUMMARY")
+    print("=" * 80)
+
+    total_success = 0
+    total_failed = 0
+
+    if results["table_results"]:
+        total_success += results["table_results"]["success_count"]
+        total_failed += results["table_results"]["failed_count"]
+        print(
+            f"Table DDL: {results['table_results']['success_count']} succeeded, {results['table_results']['failed_count']} failed"
+        )
+
+    if results["column_results"]:
+        total_success += results["column_results"]["success_count"]
+        total_failed += results["column_results"]["failed_count"]
+        print(
+            f"Column DDL: {results['column_results']['success_count']} succeeded, {results['column_results']['failed_count']} failed"
+        )
+
+    print(f"\nTotal: {total_success} succeeded, {total_failed} failed")
+
+    # Show failures
+    if total_failed > 0:
+        print("\n" + "-" * 80)
+        print("FAILED DDL STATEMENTS:")
+        print("-" * 80)
+
+        if results["table_results"] and results["table_results"]["failed_statements"]:
+            for i, fail in enumerate(results["table_results"]["failed_statements"], 1):
+                # Security: Do not print full DDL (may contain sensitive data in comments)
+                stmt_preview = (
+                    fail["statement"][:100] + "..."
+                    if len(fail["statement"]) > 100
+                    else fail["statement"]
+                )
+                print(f"\n#{i} Statement preview: {stmt_preview}")
+                print(f"Error: {fail['error'][:200]}...")  # Truncate long errors
+
+        if results["column_results"] and results["column_results"]["failed_statements"]:
+            for i, fail in enumerate(results["column_results"]["failed_statements"], 1):
+                # Security: Do not print full DDL (may contain sensitive data in comments)
+                stmt_preview = (
+                    fail["statement"][:100] + "..."
+                    if len(fail["statement"]) > 100
+                    else fail["statement"]
+                )
+                print(f"\n#{i} Statement preview: {stmt_preview}")
+                print(f"Error: {fail['error'][:200]}...")
+
+    # Show missing tags
+    if results["all_missing_tags"]:
+        print("\n" + "-" * 80)
+        print("MISSING GOVERNANCE TAGS:")
+        print("-" * 80)
+        for tag in results["all_missing_tags"]:
+            print(f"  - {tag}")
+        print("\nTo create these tags, run:")
+        for tag in results["all_missing_tags"]:
+            print(f"  CREATE TAG {config.catalog_name}.{tag};")
+
+    print("=" * 80 + "\n")
 
 
 def create_pi_table_df(
@@ -2648,23 +2644,23 @@ def get_protected_classification_for_table(table_classification: str) -> str:
     return "None"
 
 
-# def summarize_table_content(table_df, config, table_name):
-#     print(sys._getframe().f_code.co_name)
-#     """Create a new completion class for this."""
-#     if table_df.count() > 1:
-#         summarizer = TableCommentSummarizer(config, table_df)
-#         summary = summarizer.summarize_comments(table_name)
+def summarize_table_content(table_df, config, table_name):
+    print(sys._getframe().f_code.co_name)
+    """Create a new completion class for this."""
+    if table_df.count() > 1:
+        summarizer = TableCommentSummarizer(config, table_df)
+        summary = summarizer.summarize_comments(table_name)
 
-#         if summary is None:
-#             summary = "No table summary available"
-#         elif not isinstance(summary, str):
-#             summary = str(summary)
+        if summary is None:
+            summary = "No table summary available"
+        elif not isinstance(summary, str):
+            summary = str(summary)
 
-#         summary_df = table_df.limit(1).withColumn("column_content", lit(summary))
-#         return summary_df
-#     if table_df.count() == 1:
-#         return table_df
-#     raise ValueError("No table rows found during summarization...")
+        summary_df = table_df.limit(1).withColumn("column_content", lit(summary))
+        return summary_df
+    if table_df.count() == 1:
+        return table_df
+    raise ValueError("No table rows found during summarization...")
 
 
 def setup_ddl(config: MetadataConfig) -> None:
@@ -2722,24 +2718,24 @@ def create_tables(config: MetadataConfig) -> None:
         )
 
 
-# def instantiate_metadata_objects(
-#     env, mode, catalog_name=None, schema_name=None, table_names=None, base_url=None
-# ):
-#     print(sys._getframe().f_code.co_name)
-#     """By default, variables from variables.yml will be used.
-#     If widget values are provided, they will override."""
-#     METADATA_PARAMS = {"table_names": table_names}
-#     if catalog_name and catalog_name != "":
-#         METADATA_PARAMS["catalog_name"] = catalog_name
-#     if schema_name and schema_name != "":
-#         METADATA_PARAMS["dest_schema"] = schema_name
-#     if mode and mode != "":
-#         METADATA_PARAMS["mode"] = mode
-#     if mode and mode != "":
-#         METADATA_PARAMS["env"] = env
-#     if base_url and base_url != "":
-#         METADATA_PARAMS["base_url"] = base_url
-#     return METADATA_PARAMS
+def instantiate_metadata_objects(
+    env, mode, catalog_name=None, schema_name=None, table_names=None, base_url=None
+):
+    print(sys._getframe().f_code.co_name)
+    """By default, variables from variables.yml will be used.
+    If widget values are provided, they will override."""
+    METADATA_PARAMS = {"table_names": table_names}
+    if catalog_name and catalog_name != "":
+        METADATA_PARAMS["catalog_name"] = catalog_name
+    if schema_name and schema_name != "":
+        METADATA_PARAMS["dest_schema"] = schema_name
+    if mode and mode != "":
+        METADATA_PARAMS["mode"] = mode
+    if mode and mode != "":
+        METADATA_PARAMS["env"] = env
+    if base_url and base_url != "":
+        METADATA_PARAMS["base_url"] = base_url
+    return METADATA_PARAMS
 
 
 def trim_whitespace_from_df(df: DataFrame) -> DataFrame:
@@ -2851,30 +2847,29 @@ def generate_and_persist_metadata(config: Any) -> None:
                 "_updated_at": str(datetime.now()),
             }
             # Mark table as failed in control table
-            # if config.control_table:
-            #     mark_table_failed(table, config, str(tpe))
-            # raise  # Optionally re-raise if you want to halt further processing
+            if config.control_table:
+                mark_table_failed(table, config, str(tpe))
+            raise  # Optionally re-raise if you want to halt further processing
 
         except Exception as e:
-            print(e)
-            # # Extract concise error message
-            # concise_error = extract_concise_error(e)
-            # logger.error(
-            #     "[generate_and_persist_metadata] Error for %s: %s", table, concise_error
-            # )
+            # Extract concise error message
+            concise_error = extract_concise_error(e)
+            logger.error(
+                "[generate_and_persist_metadata] Error for %s: %s", table, concise_error
+            )
 
-            # log_dict = {
-            #     "full_table_name": table,
-            #     "status": f"Processing failed: {concise_error}",
-            #     "user": sanitize_user_identifier(config.current_user),
-            #     "mode": config.mode,
-            #     "apply_ddl": config.apply_ddl,
-            #     "_updated_at": str(datetime.now()),
-            # }
-            # # Mark table as failed in control table
-            # if config.control_table:
-            #     mark_table_failed(table, config, concise_error)
-            # raise
+            log_dict = {
+                "full_table_name": table,
+                "status": f"Processing failed: {concise_error}",
+                "user": sanitize_user_identifier(config.current_user),
+                "mode": config.mode,
+                "apply_ddl": config.apply_ddl,
+                "_updated_at": str(datetime.now()),
+            }
+            # Mark table as failed in control table
+            if config.control_table:
+                mark_table_failed(table, config, concise_error)
+            raise
 
         finally:
             try:
@@ -2887,13 +2882,12 @@ def generate_and_persist_metadata(config: Any) -> None:
                     "[generate_and_persist_metadata] Log written for table %s.", table
                 )
             except Exception as log_err:
-                print(log_err)
-                # concise_log_err = extract_concise_error(log_err)
-                # logger.error(
-                #     "[generate_and_persist_metadata] Failed to write log for %s: %s",
-                #     table,
-                #     concise_log_err,
-                # )
+                concise_log_err = extract_concise_error(log_err)
+                logger.error(
+                    "[generate_and_persist_metadata] Failed to write log for %s: %s",
+                    table,
+                    concise_log_err,
+                )
             print(f"Finished processing table {table} and writing to log table.")
     
     # Log summary of skipped tables for concurrent task visibility
@@ -3122,39 +3116,39 @@ def is_schema_wildcard(table_name: str) -> bool:
     return table_name.strip().endswith(".*") and table_name.count(".") == 2
 
 
-# def get_tables_in_schema(catalog_name: str, schema_name: str) -> List[str]:
-#     print(sys._getframe().f_code.co_name)
-#     """
-#     Get all table names in a given catalog and schema.
+def get_tables_in_schema(catalog_name: str, schema_name: str) -> List[str]:
+    print(sys._getframe().f_code.co_name)
+    """
+    Get all table names in a given catalog and schema.
 
-#     Args:
-#         catalog_name (str): The catalog name.
-#         schema_name (str): The schema name.
+    Args:
+        catalog_name (str): The catalog name.
+        schema_name (str): The schema name.
 
-#     Returns:
-#         List[str]: A list of fully qualified table names.
-#     """
-#     spark = SparkSession.builder.getOrCreate()
+    Returns:
+        List[str]: A list of fully qualified table names.
+    """
+    spark = SparkSession.builder.getOrCreate()
 
-#     try:
-#         # Use SHOW TABLES to get all tables in the schema
-#         tables_df = spark.sql(f"SHOW TABLES IN {catalog_name}.{schema_name}")
+    try:
+        # Use SHOW TABLES to get all tables in the schema
+        tables_df = spark.sql(f"SHOW TABLES IN {catalog_name}.{schema_name}")
 
-#         # Extract table names and create fully qualified names
-#         table_names = []
-#         for row in tables_df.collect():
-#             table_name = row["tableName"]
-#             fully_qualified_name = f"{catalog_name}.{schema_name}.{table_name}"
-#             table_names.append(fully_qualified_name)
+        # Extract table names and create fully qualified names
+        table_names = []
+        for row in tables_df.collect():
+            table_name = row["tableName"]
+            fully_qualified_name = f"{catalog_name}.{schema_name}.{table_name}"
+            table_names.append(fully_qualified_name)
 
-#         print(f"Found {len(table_names)} tables in schema {catalog_name}.{schema_name}")
-#         return table_names
+        print(f"Found {len(table_names)} tables in schema {catalog_name}.{schema_name}")
+        return table_names
 
-#     except Exception as e:
-#         print(
-#             f"Error retrieving tables from schema {catalog_name}.{schema_name}: {str(e)}"
-#         )
-#         return []
+    except Exception as e:
+        print(
+            f"Error retrieving tables from schema {catalog_name}.{schema_name}: {str(e)}"
+        )
+        return []
 
 
 def expand_schema_wildcards(table_names: List[str]) -> List[str]:
@@ -3176,10 +3170,10 @@ def expand_schema_wildcards(table_names: List[str]) -> List[str]:
             parts = table_name.replace(".*", "").split(".")
             if len(parts) == 2:
                 catalog_name, schema_name = parts
-                # # Get all tables in the schema
-                # schema_tables = get_tables_in_schema(catalog_name, schema_name)
-                # expanded_names.extend(schema_tables)
-                # print(f"Expanded {table_name} to {len(schema_tables)} tables")
+                # Get all tables in the schema
+                schema_tables = get_tables_in_schema(catalog_name, schema_name)
+                expanded_names.extend(schema_tables)
+                print(f"Expanded {table_name} to {len(schema_tables)} tables")
             else:
                 print(f"Warning: Invalid wildcard pattern {table_name}, skipping")
         else:
@@ -3235,78 +3229,78 @@ def split_fully_scoped_table_name(df: DataFrame, full_table_name_col: str) -> Da
     return df
 
 
-# def split_table_names(table_names: str) -> List[str]:
-#     print(sys._getframe().f_code.co_name)
-#     """Split a comma-separated string of table names into a list of table names.
+def split_table_names(table_names: str) -> List[str]:
+    print(sys._getframe().f_code.co_name)
+    """Split a comma-separated string of table names into a list of table names.
 
-#     Args:
-#         table_names (str): The comma-separated string of table names.
+    Args:
+        table_names (str): The comma-separated string of table names.
 
-#     Returns:
-#         List[str]: The list of table names.
-#     """
-#     if not table_names:
-#         return []
-#     return table_names.split(",")
-
-
-# def replace_fully_scoped_table_column(df):
-#     print(sys._getframe().f_code.co_name)
-#     """Replace the fully scoped table column with the table name.
-
-#     Args:
-#         df (DataFrame): The DataFrame to replace the fully scoped table column with the table name.
-
-#     Returns:
-#         DataFrame: The DataFrame with the fully scoped table column replaced with the table name.
-#     """
-#     return df.withColumn("table", split_part(col("table"), ".", -1))
+    Returns:
+        List[str]: The list of table names.
+    """
+    if not table_names:
+        return []
+    return table_names.split(",")
 
 
-# def _create_table_comment_ddl_func():
-#     print(sys._getframe().f_code.co_name)
+def replace_fully_scoped_table_column(df):
+    print(sys._getframe().f_code.co_name)
+    """Replace the fully scoped table column with the table name.
 
-#     def table_comment_ddl(full_table_name: str, comment: str) -> str:
-#         print(sys._getframe().f_code.co_name)
-#         if comment is not None:
-#             comment = comment.replace('""', "'")
-#             comment = comment.replace('"', "'")
-#         return f"""COMMENT ON TABLE {full_table_name} IS "{comment}";"""
+    Args:
+        df (DataFrame): The DataFrame to replace the fully scoped table column with the table name.
 
-#     return table_comment_ddl
+    Returns:
+        DataFrame: The DataFrame with the fully scoped table column replaced with the table name.
+    """
+    return df.withColumn("table", split_part(col("table"), ".", -1))
 
 
-# def _create_column_comment_ddl_func():
-#     print(sys._getframe().f_code.co_name)
-#     def column_comment_ddl(full_table_name: str, column_name: str, comment: str) -> str:
-#         print(sys._getframe().f_code.co_name)
-#         if comment is not None:
-#             comment = comment.replace('""', "'")
-#             comment = comment.replace('"', "'")
+def _create_table_comment_ddl_func():
+    print(sys._getframe().f_code.co_name)
 
-#         dbr_number = os.environ.get("DATABRICKS_RUNTIME_VERSION")
+    def table_comment_ddl(full_table_name: str, comment: str) -> str:
+        print(sys._getframe().f_code.co_name)
+        if comment is not None:
+            comment = comment.replace('""', "'")
+            comment = comment.replace('"', "'")
+        return f"""COMMENT ON TABLE {full_table_name} IS "{comment}";"""
 
-#         if dbr_number is None:
-#             # Default to newer syntax for serverless (assumes DBR 15+)
-#             ddl_statement = f"""COMMENT ON COLUMN {full_table_name}.`{column_name}` IS "{comment}";"""
-#         else:
-#             try:
-#                 dbr_version = float(dbr_number)
-#                 if dbr_version is None:
-#                     raise ValueError(f"Databricks runtime version is None")
-#                 if dbr_version >= 16:
-#                     ddl_statement = f"""COMMENT ON COLUMN {full_table_name}.`{column_name}` IS "{comment}";"""
-#                 elif dbr_version >= 14 and dbr_version < 16:
-#                     ddl_statement = f"""ALTER TABLE {full_table_name} ALTER COLUMN `{column_name}` COMMENT "{comment}";"""
-#                 else:
-#                     raise ValueError(
-#                         f"Unsupported Databricks runtime version: {dbr_number}"
-#                     )
-#             except ValueError as e:
-#                 ddl_statement = f"""COMMENT ON COLUMN {full_table_name}.`{column_name}` IS "{comment}";"""
-#         return ddl_statement
+    return table_comment_ddl
 
-#     return column_comment_ddl
+
+def _create_column_comment_ddl_func():
+    print(sys._getframe().f_code.co_name)
+    def column_comment_ddl(full_table_name: str, column_name: str, comment: str) -> str:
+        print(sys._getframe().f_code.co_name)
+        if comment is not None:
+            comment = comment.replace('""', "'")
+            comment = comment.replace('"', "'")
+
+        dbr_number = os.environ.get("DATABRICKS_RUNTIME_VERSION")
+
+        if dbr_number is None:
+            # Default to newer syntax for serverless (assumes DBR 15+)
+            ddl_statement = f"""COMMENT ON COLUMN {full_table_name}.`{column_name}` IS "{comment}";"""
+        else:
+            try:
+                dbr_version = float(dbr_number)
+                if dbr_version is None:
+                    raise ValueError(f"Databricks runtime version is None")
+                if dbr_version >= 16:
+                    ddl_statement = f"""COMMENT ON COLUMN {full_table_name}.`{column_name}` IS "{comment}";"""
+                elif dbr_version >= 14 and dbr_version < 16:
+                    ddl_statement = f"""ALTER TABLE {full_table_name} ALTER COLUMN `{column_name}` COMMENT "{comment}";"""
+                else:
+                    raise ValueError(
+                        f"Unsupported Databricks runtime version: {dbr_number}"
+                    )
+            except ValueError as e:
+                ddl_statement = f"""COMMENT ON COLUMN {full_table_name}.`{column_name}` IS "{comment}";"""
+        return ddl_statement
+
+    return column_comment_ddl
 
 
 def _create_table_pi_information_ddl_func(config: MetadataConfig):
@@ -3341,37 +3335,37 @@ def _create_pi_information_ddl_func(config: MetadataConfig):
     return pi_information_ddl
 
 
-# def _create_table_domain_ddl_func(config: MetadataConfig):
-#     print(sys._getframe().f_code.co_name)
-#     domain_tag = getattr(config, "domain_tag_name", "domain")
-#     subdomain_tag = getattr(config, "subdomain_tag_name", "subdomain")
+def _create_table_domain_ddl_func(config: MetadataConfig):
+    print(sys._getframe().f_code.co_name)
+    domain_tag = getattr(config, "domain_tag_name", "domain")
+    subdomain_tag = getattr(config, "subdomain_tag_name", "subdomain")
 
-#     def table_domain_ddl(full_table_name: str, domain: str, subdomain: str) -> str:
-#         print(sys._getframe().f_code.co_name)
-#         """
-#         Generate DDL for domain classification as table tags.
+    def table_domain_ddl(full_table_name: str, domain: str, subdomain: str) -> str:
+        print(sys._getframe().f_code.co_name)
+        """
+        Generate DDL for domain classification as table tags.
 
-#         Args:
-#             full_table_name: The full table name (catalog.schema.table)
-#             domain: Primary domain classification
-#             subdomain: Subdomain classification (can be None or empty)
+        Args:
+            full_table_name: The full table name (catalog.schema.table)
+            domain: Primary domain classification
+            subdomain: Subdomain classification (can be None or empty)
 
-#         Returns:
-#             DDL statement to set table tags with domain information
-#         """
-#         if subdomain is None or subdomain == "None" or subdomain.strip() == "":
-#             return (
-#                 f"ALTER TABLE {full_table_name} SET TAGS ('{domain_tag}' = '{domain}');"
-#             )
-#         return f"ALTER TABLE {full_table_name} SET TAGS ('{domain_tag}' = '{domain}', '{subdomain_tag}' = '{subdomain}');"
+        Returns:
+            DDL statement to set table tags with domain information
+        """
+        if subdomain is None or subdomain == "None" or subdomain.strip() == "":
+            return (
+                f"ALTER TABLE {full_table_name} SET TAGS ('{domain_tag}' = '{domain}');"
+            )
+        return f"ALTER TABLE {full_table_name} SET TAGS ('{domain_tag}' = '{domain}', '{subdomain_tag}' = '{subdomain}');"
 
-#     return table_domain_ddl
+    return table_domain_ddl
 
 
-# generate_table_comment_ddl = udf(_create_table_comment_ddl_func(), StringType())
-# generate_column_comment_ddl = udf(_create_column_comment_ddl_func(), StringType())
+generate_table_comment_ddl = udf(_create_table_comment_ddl_func(), StringType())
+generate_column_comment_ddl = udf(_create_column_comment_ddl_func(), StringType())
 
-# # These UDFs require config and are created dynamically in their respective functions
-# # generate_table_pi_information_ddl
-# # generate_pi_information_ddl
-# # generate_table_domain_ddl
+# These UDFs require config and are created dynamically in their respective functions
+# generate_table_pi_information_ddl
+# generate_pi_information_ddl
+# generate_table_domain_ddl
