@@ -1,4 +1,5 @@
 """Processing utilities shared among modules."""
+
 import sys
 import os
 import shutil
@@ -1941,7 +1942,7 @@ def get_domain_classification(
     return classification_result
 
 
-def get_generated_metadata(\
+def get_generated_metadata(
     config: MetadataConfig, full_table_name: str
 ) -> List[Tuple[PIResponse, CommentResponse]]:
     print(sys._getframe().f_code.co_name)
