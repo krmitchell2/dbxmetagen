@@ -147,6 +147,7 @@ def analyze_column(
                 entities=entities,
                 score_threshold=score_threshold,
             )
+            print(analysis)
             results.append(analysis)
         except Exception as e:
             logging.error("Error analyzing cell at index %s: %s", i, e)
