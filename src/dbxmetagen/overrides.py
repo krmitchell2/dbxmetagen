@@ -213,53 +213,53 @@ def apply_overrides_with_loop(df, csv_dict, config):
     return df
 
 
-# def apply_overrides_with_joins(df: DataFrame, csv_spark_df: DataFrame) -> DataFrame:
-#     """
-#     Applies overrides using joins for large CSV files.
+def apply_overrides_with_joins(df: DataFrame, csv_spark_df: DataFrame) -> DataFrame:
+    """
+    Applies overrides using joins for large CSV files.
 
-#     Args:
-#         df (DataFrame): The input DataFrame.
-#         csv_spark_df (DataFrame): The CSV DataFrame.
+    Args:
+        df (DataFrame): The input DataFrame.
+        csv_spark_df (DataFrame): The CSV DataFrame.
 
-#     Returns:
-#         DataFrame: The updated DataFrame with overridden type and classification.
+    Returns:
+        DataFrame: The updated DataFrame with overridden type and classification.
 
-#     NOT FULLY IMPLEMENTED
-#     """
-#     join_conditions = get_join_conditions(df, csv_spark_df)
-#     if config.mode == "pi":
-#         df = (
-#             df.join(csv_spark_df, join_conditions, "left_outer")
-#             .withColumn(
-#                 "classification",
-#                 when(
-#                     col("classification_override").isNotNull(),
-#                     col("classification_override"),
-#                 ).otherwise(col("classification")),
-#             )
-#             .withColumn(
-#                 "type",
-#                 when(col("type_override").isNotNull(), col("type_override")).otherwise(
-#                     col("type")
-#                 ),
-#             )
-#             .drop("classification_override", "type_override")
-#         )
-#     elif config.mode == "comment":
-#         df = (
-#             df.join(csv_spark_df, join_conditions, "left_outer")
-#             .withColumn(
-#                 "column_content",
-#                 when(
-#                     col("comment_override").isNotNull(), col("comment_override")
-#                 ).otherwise(col("column_content")),
-#             )
-#             .drop("comment_override")
-#         )
-#     else:
-#         raise ValueError("Invalid mode provided.")
+    NOT FULLY IMPLEMENTED
+    """
+    join_conditions = get_join_conditions(df, csv_spark_df)
+    if config.mode == "pi":
+        df = (
+            df.join(csv_spark_df, join_conditions, "left_outer")
+            .withColumn(
+                "classification",
+                when(
+                    col("classification_override").isNotNull(),
+                    col("classification_override"),
+                ).otherwise(col("classification")),
+            )
+            .withColumn(
+                "type",
+                when(col("type_override").isNotNull(), col("type_override")).otherwise(
+                    col("type")
+                ),
+            )
+            .drop("classification_override", "type_override")
+        )
+    elif config.mode == "comment":
+        df = (
+            df.join(csv_spark_df, join_conditions, "left_outer")
+            .withColumn(
+                "column_content",
+                when(
+                    col("comment_override").isNotNull(), col("comment_override")
+                ).otherwise(col("column_content")),
+            )
+            .drop("comment_override")
+        )
+    else:
+        raise ValueError("Invalid mode provided.")
 
-#     return df
+    return df
 
 
 def build_condition(df, table, column, schema, catalog):
