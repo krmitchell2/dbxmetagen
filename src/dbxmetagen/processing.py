@@ -2004,6 +2004,8 @@ def get_generated_metadata_data_aware(
         sampled_chunk = sample_df(chunk, nrows, config.sample_size)
         prompt = PromptFactory.create_prompt(config, sampled_chunk, full_table_name)
         prompt_messages = prompt.create_prompt_template()
+        print("prompt.prompt content", prompt.prompt_content)
+        print("prompt.prompt content", prompt.prompt_content)
         check_token_length_against_num_words(prompt_messages, config)
         if config.registered_model_name != "default":
             chat_response = call_registered_model(config)
@@ -2012,6 +2014,7 @@ def get_generated_metadata_data_aware(
         response, _ = chat_response.get_responses(
             prompt_messages, prompt.prompt_content
         )
+        print("Response", response)
         # Store presidio results with the response for PI mode
         if hasattr(prompt, "deterministic_results"):
             response.presidio_results = prompt.deterministic_results
