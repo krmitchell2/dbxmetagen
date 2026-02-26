@@ -60,18 +60,20 @@ except ImportError:
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 from src.dbxmetagen.config import MetadataConfig
 from src.dbxmetagen.sampling import determine_sampling_ratio
-from src.dbxmetagen.prompts import Prompt, PIPrompt, CommentPrompt, PromptFactory
-from src.dbxmetagen.error_handling import exponential_backoff, validate_csv
-from src.dbxmetagen.comment_summarizer import TableCommentSummarizer
+# from src.dbxmetagen.prompts import Prompt, PIPrompt, CommentPrompt, PromptFactory
+from src.dbxmetagen.prompts import Prompt, PIPrompt, PromptFactory
+from src.dbxmetagen.error_handling import validate_csv
+# from src.dbxmetagen.error_handling import exponential_backoff, validate_csv
+# from src.dbxmetagen.comment_summarizer import TableCommentSummarizer
 from src.dbxmetagen.metadata_generator import (
     Response,
     PIResponse,
-    CommentResponse,
+    # CommentResponse,
     PIColumnContent,
     MetadataGeneratorFactory,
     PIIdentifier,
     MetadataGenerator,
-    CommentGenerator,
+    # CommentGenerator,
 )
 from src.dbxmetagen.overrides import (
     override_metadata_from_csv,
@@ -80,7 +82,7 @@ from src.dbxmetagen.overrides import (
     get_join_conditions,
 )
 from src.dbxmetagen.user_utils import sanitize_user_identifier, get_current_user
-from src.dbxmetagen.domain_classifier import load_domain_config, classify_table_domain
+# from src.dbxmetagen.domain_classifier import load_domain_config, classify_table_domain
 
 logging.basicConfig(
     level=logging.WARNING,
