@@ -252,7 +252,6 @@ def read_table_with_type_conversion(
     spark: SparkSession, full_table_name: str
 ) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-    
     """
     Read a table with automatic conversion of special types (BINARY, VARIANT).
     Uses SQL-based approach to handle VARIANT types which fail in Spark Connect schema access.
@@ -408,7 +407,6 @@ def append_table_row(
     tokenized_full_table_name: str,
 ) -> List[Row]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Appends a table row to the list of rows.
 
@@ -434,14 +432,12 @@ def append_table_row(
 
 
 def append_domain_table_row(
-
     rows: List[Row],
     full_table_name: str,
     domain_result: Dict[str, Any],
     tokenized_full_table_name: str,
 ) -> List[Row]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Appends a domain classification row to the list of rows.
 
@@ -484,7 +480,6 @@ def append_domain_table_row(
 
 
 def append_column_rows(
-
     config: MetadataConfig,
     rows: List[Row],
     full_table_name: str,
@@ -492,7 +487,6 @@ def append_column_rows(
     tokenized_full_table_name: str,
 ) -> List[Row]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Appends column rows to the list of rows.
 
@@ -785,7 +779,6 @@ def df_to_sql_file(
     filename: str,
 ) -> str:
     print(sys._getframe().f_code.co_name)
-    
     """
     Writes a DataFrame to a SQL file using Spark-native operations (no collect()).
 
@@ -845,7 +838,6 @@ def df_column_to_excel_file(
     df: pd.DataFrame, filename: str, base_path: str, excel_column: str
 ) -> str:
     print(sys._getframe().f_code.co_name)
-    
     """
     Exports a specified column from a DataFrame to an Excel file.
 
@@ -1442,7 +1434,6 @@ def log_metadata_generation(
     df: DataFrame, config: MetadataConfig, table_name: str, volume_name: str
 ) -> None:
     print(sys._getframe().f_code.co_name)
-    
     """
     Log the metadata generation to the unified log table.
     """
@@ -1521,7 +1512,6 @@ def filter_and_write_ddl(
     current_date: str,
 ) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-    
     """Filter the DataFrame based on the table name and write the DDL statements to a SQL file.
     Args:
         df (DataFrame): The DataFrame containing the DDL statements.
@@ -1571,7 +1561,6 @@ def write_ddl_to_volume_spark_native(
     df: DataFrame, file_name: str, base_path: str, output_format: str
 ):
     print(sys._getframe().f_code.co_name)
-    
     """
     Write DDL statements to volume using collect() - simpler approach for compatibility.
     """
@@ -1646,7 +1635,6 @@ def create_and_persist_ddl(
     df: DataFrame, config: MetadataConfig, table_name: str
 ) -> None:
     print(sys._getframe().f_code.co_name)
-    
     """
     Writes the DDL statements from the DataFrame to a volume as SQL files.
 
@@ -1889,7 +1877,6 @@ def get_domain_classification(
     config: MetadataConfig, full_table_name: str
 ) -> Dict[str, Any]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Generates domain classification for a given table.
 
@@ -1967,7 +1954,6 @@ def get_generated_metadata(
     config: MetadataConfig, full_table_name: str
 ) -> List[Tuple[PIResponse, CommentResponse]]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Generates metadata for a given table.
     Wraps get_generated_metadata_data_aware() to allow
@@ -2007,7 +1993,6 @@ def get_generated_metadata_data_aware(
     spark: SparkSession, config: MetadataConfig, full_table_name: str
 ):
     print(sys._getframe().f_code.co_name)
-    
     """
     Generates metadata for a given table.
 
@@ -2062,7 +2047,6 @@ def review_and_generate_metadata(
     config: MetadataConfig, full_table_name: str
 ) -> Tuple[DataFrame, DataFrame]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Reviews and generates metadata for a list of tables based on the mode.
 
@@ -2405,7 +2389,6 @@ def add_ddl_to_domain_table_df(
     table_df: DataFrame, ddl_col_name: str, config
 ) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-    
     """
     Adds DDL statements to domain classification DataFrame.
 
@@ -2555,7 +2538,6 @@ def create_pi_table_df(
     column_df: DataFrame, table_name: str, config: MetadataConfig
 ) -> DataFrame:
     print(sys._getframe().f_code.co_name)
-    
     """
     Creates a DataFrame for PI information at the table level.
     Can be expanded to indicate the type of PI, but for tables it's a
@@ -2754,7 +2736,6 @@ def instantiate_metadata_objects(
     env, mode, catalog_name=None, schema_name=None, table_names=None, base_url=None
 ):
     print(sys._getframe().f_code.co_name)
-    
     """By default, variables from variables.yml will be used.
     If widget values are provided, they will override."""
     METADATA_PARAMS = {"table_names": table_names}
@@ -3008,7 +2989,6 @@ def ensure_fully_scoped_table_names(
     table_names: List[str], default_catalog: str
 ) -> List[str]:
     print(sys._getframe().f_code.co_name)
-    
     """
     Ensures that table names are fully scoped with catalog and schema.
 
@@ -3036,7 +3016,6 @@ def upsert_table_names_to_control_table(
     table_names: List[str], config: MetadataConfig, max_retries: int = 3
 ) -> None:
     print(sys._getframe().f_code.co_name)
-    
     """
     Upserts a list of table names into the control table using MERGE for concurrent safety.
 
