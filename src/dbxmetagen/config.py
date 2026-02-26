@@ -4,9 +4,11 @@ import uuid
 from datetime import datetime
 import yaml
 from src.dbxmetagen.user_utils import sanitize_user_identifier, get_current_user
+import sys
 
 
 def _parse_bool(value):
+    print(sys._getframe().f_code.co_name)
     """Convert string/bool to actual boolean with proper validation.
 
     Args:
@@ -117,6 +119,7 @@ class MetadataConfig:
     MODEL_PARAMS = {}
 
     def __init__(self, **kwargs):
+        print(sys._getframe().f_code.co_name)
         self.setup_params = self.__class__.SETUP_PARAMS
         self.model_params = self.__class__.MODEL_PARAMS
         self.log_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -212,6 +215,7 @@ class MetadataConfig:
             self.run_id = str(uuid.uuid4())
 
     def get_temp_metadata_log_table_name(self) -> str:
+        print(sys._getframe().f_code.co_name)
         """
         Generate unique temp metadata generation log table name for this job run.
         Ensures concurrent jobs don't interfere with each other's temp tables.
@@ -225,6 +229,7 @@ class MetadataConfig:
         return table_name
 
     def load_yaml(self, file_path=None, variable_names=None):
+        print(sys._getframe().f_code.co_name)
         """Load YAML file."""
         import os
 
