@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from src.dbxmetagen.config import MetadataConfig
 from src.dbxmetagen.error_handling import exponential_backoff
 from src.dbxmetagen.chat_client import ChatClientFactory
+import sys
 
 
 class Response(BaseModel):
@@ -35,9 +36,11 @@ class CommentResponse(Response):
     @field_validator("column_contents", mode="before")
     @classmethod
     def validate_column_contents(cls, v):
+        print(sys._getframe().f_code.co_name)
         """Convert string to list if needed, flatten nested lists, parse stringified arrays."""
 
         def try_parse_stringified_array(s):
+            print(sys._getframe().f_code.co_name)
             """Try to parse a string as a JSON array. Returns (success, parsed_list_or_original)."""
             if isinstance(s, str):
                 stripped = s.strip()
@@ -106,6 +109,7 @@ class SummaryCommentResponse(Response):
 
 class MetadataGenerator(ABC):
     def from_context(self, config):
+        print(sys._getframe().f_code.co_name)
         self.config = config
         self.chat_client = ChatClientFactory.create_client(config)
 
@@ -113,6 +117,7 @@ class MetadataGenerator(ABC):
     def get_responses(
         self, prompt=None, prompt_content=None
     ) -> Tuple[Response, ChatCompletion]:
+        print(sys._getframe().f_code.co_name)
         """Abstract method to get responses from the chat client.
 
         Args:
@@ -132,6 +137,7 @@ class CommentGenerator(MetadataGenerator):
     def get_responses(
         self, prompt, prompt_content
     ) -> Tuple[CommentResponse, ChatCompletion]:
+        print(sys._getframe().f_code.co_name)
 
         prompt_size = len(json.dumps(prompt))
         if prompt_size > self.config.max_prompt_length * 5:
@@ -150,6 +156,7 @@ class CommentGenerator(MetadataGenerator):
         return comment_response, message_payload
 
     def predict_chat_response(self, prompt_content):
+        print(sys._getframe().f_code.co_name)
         """
         Predict the chat response using the appropriate chat client.
         """
@@ -174,6 +181,7 @@ class CommentGenerator(MetadataGenerator):
         retries: int = 0,
         max_retries: int = 5,
     ) -> Tuple[CommentResponse, Dict[str, Any]]:
+        print(sys._getframe().f_code.co_name)
         try:
             chat_response = self._get_chat_completion(
                 config, prompt_content, model, max_tokens, temperature
@@ -207,6 +215,7 @@ class CommentGenerator(MetadataGenerator):
         retries: int = 0,
         max_retries: int = 0,
     ) -> ChatCompletion:
+        print(sys._getframe().f_code.co_name)
         try:
             return self.predict_chat_response(prompt_content)
         except Exception as e:
@@ -227,6 +236,7 @@ class CommentGenerator(MetadataGenerator):
                 raise e
 
     def _parse_response(self, response: str) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         try:
             response_dict = json.loads(response)
             if not isinstance(response_dict, dict):
@@ -236,6 +246,7 @@ class CommentGenerator(MetadataGenerator):
             raise ValueError(f"JSON decode error: {e}")
 
     def _validate_response(self, content: str, response_dict: Dict[str, Any]) -> None:
+        print(sys._getframe().f_code.co_name)
         if not self._check_list_and_dict_keys_match(
             content["column_contents"]["columns"], response_dict["columns"]
         ):
@@ -243,6 +254,7 @@ class CommentGenerator(MetadataGenerator):
 
     @staticmethod
     def _check_list_and_dict_keys_match(dict_list, string_list):
+        print(sys._getframe().f_code.co_name)
         if isinstance(dict_list, list):
             dict_keys = dict_list
         else:
@@ -261,6 +273,7 @@ class PIIdentifier(MetadataGenerator):
     def get_responses(
         self, prompt, prompt_content
     ) -> Tuple[PIResponse, ChatCompletion]:
+        print(sys._getframe().f_code.co_name)
         prompt_size = len(json.dumps(prompt))
         if prompt_size > self.config.max_prompt_length * 5:
             raise ValueError(
@@ -278,6 +291,7 @@ class PIIdentifier(MetadataGenerator):
         return comment_response, message_payload
 
     def predict_chat_response(self, prompt_content):
+        print(sys._getframe().f_code.co_name)
         try:
             self.chat_response = self.chat_client.create_structured_completion(
                 messages=prompt_content,
@@ -302,6 +316,7 @@ class PIIdentifier(MetadataGenerator):
         retries: int = 0,
         max_retries: int = 0,
     ) -> Tuple[PIResponse, Dict[str, Any]]:
+        print(sys._getframe().f_code.co_name)
         try:
             chat_response = self._get_chat_completion(
                 config, prompt_content, model, max_tokens, temperature
@@ -335,6 +350,7 @@ class PIIdentifier(MetadataGenerator):
         retries: int = 0,
         max_retries: int = 0,
     ) -> ChatCompletion:
+        print(sys._getframe().f_code.co_name)
         try:
             return self.predict_chat_response(prompt_content)
         except Exception as e:
@@ -354,6 +370,7 @@ class PIIdentifier(MetadataGenerator):
                 raise e
 
     def _parse_response(self, response: str) -> Dict[str, Any]:
+        print(sys._getframe().f_code.co_name)
         try:
             response_dict = json.loads(response)
             if not isinstance(response_dict, dict):
@@ -363,6 +380,7 @@ class PIIdentifier(MetadataGenerator):
             raise ValueError(f"JSON decode error: {e}")
 
     def _validate_response(self, content: str, response_dict: Dict[str, Any]) -> None:
+        print(sys._getframe().f_code.co_name)
         if not self._check_list_and_dict_keys_match(
             content["column_contents"]["columns"], response_dict["columns"]
         ):
@@ -370,6 +388,7 @@ class PIIdentifier(MetadataGenerator):
 
     @staticmethod
     def _check_list_and_dict_keys_match(dict_list, string_list):
+        print(sys._getframe().f_code.co_name)
         if isinstance(dict_list, list):
             dict_keys = dict_list
         else:
@@ -387,6 +406,7 @@ class PIIdentifier(MetadataGenerator):
 class MetadataGeneratorFactory:
     @staticmethod
     def create_generator(config) -> MetadataGenerator:
+        print(sys._getframe().f_code.co_name)
         if config.mode == "comment":
             generator = CommentGenerator()
             generator.from_context(config)
