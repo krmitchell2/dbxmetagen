@@ -3342,7 +3342,6 @@ def split_table_names(table_names: str) -> List[str]:
 
 def replace_fully_scoped_table_column(df):
     print(sys._getframe().f_code.co_name)
-
     """Replace the fully scoped table column with the table name.
 
     Args:
@@ -3357,10 +3356,8 @@ def replace_fully_scoped_table_column(df):
 def _create_table_comment_ddl_func():
     print(sys._getframe().f_code.co_name)
 
-
     def table_comment_ddl(full_table_name: str, comment: str) -> str:
         print(sys._getframe().f_code.co_name)
-
         if comment is not None:
             comment = comment.replace('""', "'")
             comment = comment.replace('"', "'")
@@ -3371,10 +3368,8 @@ def _create_table_comment_ddl_func():
 
 def _create_column_comment_ddl_func():
     print(sys._getframe().f_code.co_name)
-
     def column_comment_ddl(full_table_name: str, column_name: str, comment: str) -> str:
         print(sys._getframe().f_code.co_name)
-
         if comment is not None:
             comment = comment.replace('""', "'")
             comment = comment.replace('"', "'")
@@ -3406,14 +3401,12 @@ def _create_column_comment_ddl_func():
 
 def _create_table_pi_information_ddl_func(config: MetadataConfig):
     print(sys._getframe().f_code.co_name)
-
     pi_class_tag = getattr(config, "pi_classification_tag_name", "data_classification")
     pi_subclass_tag = getattr(
         config, "pi_subclassification_tag_name", "data_subclassification"
     )
 
     def table_pi_information_ddl(
-
         table_name: str, classification: str, pi_type: str
     ) -> str:
         print(sys._getframe().f_code.co_name)
@@ -3425,18 +3418,15 @@ def _create_table_pi_information_ddl_func(config: MetadataConfig):
 
 def _create_pi_information_ddl_func(config: MetadataConfig):
     print(sys._getframe().f_code.co_name)
-
     pi_class_tag = getattr(config, "pi_classification_tag_name", "data_classification")
     pi_subclass_tag = getattr(
         config, "pi_subclassification_tag_name", "data_subclassification"
     )
 
     def pi_information_ddl(
-
         table_name: str, column_name: str, classification: str, pi_type: str
     ) -> str:
         print(sys._getframe().f_code.co_name)
-
         return f"ALTER TABLE {table_name} ALTER COLUMN `{column_name}` SET TAGS ('{pi_class_tag}' = '{classification}', '{pi_subclass_tag}' = '{pi_type}');"
 
     return pi_information_ddl
@@ -3444,13 +3434,11 @@ def _create_pi_information_ddl_func(config: MetadataConfig):
 
 def _create_table_domain_ddl_func(config: MetadataConfig):
     print(sys._getframe().f_code.co_name)
-
     domain_tag = getattr(config, "domain_tag_name", "domain")
     subdomain_tag = getattr(config, "subdomain_tag_name", "subdomain")
 
     def table_domain_ddl(full_table_name: str, domain: str, subdomain: str) -> str:
         print(sys._getframe().f_code.co_name)
-
         """
         Generate DDL for domain classification as table tags.
 
