@@ -5,6 +5,7 @@ import json
 import logging
 from databricks.sdk import WorkspaceClient
 from pyspark.sql import SparkSession
+import sys
 
 # from databricks.sdk.core import _InactiveRpcError
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
@@ -16,6 +17,7 @@ _schema_permission_cache = {}
 
 
 def setup_databricks_environment(dbutils_instance=None):
+    print(sys._getframe().f_code.co_name)
     """Set up Databricks environment variables and return current user."""
     current_user = None
     try:
@@ -56,6 +58,7 @@ def setup_databricks_environment(dbutils_instance=None):
 
 
 def get_job_context(job_id, dbutils_instance=None):
+    print(sys._getframe().f_code.co_name)
     """Get job context information if running in a job."""
     try:
         if job_id:
@@ -78,6 +81,7 @@ def get_job_context(job_id, dbutils_instance=None):
 
 
 def get_task_id(dbutils_instance=None):
+    print(sys._getframe().f_code.co_name)
     """Get task run ID from Databricks context for concurrent task identification.
     
     Returns a unique identifier for this task execution, used for table claiming
@@ -133,6 +137,7 @@ def get_task_id(dbutils_instance=None):
 
 
 def setup_widgets(dbutils):
+    print(sys._getframe().f_code.co_name)
     """Setup widgets for the notebook."""
     dbutils.widgets.dropdown(
         "cleanup_control_table", "false", ["true", "false"], "Cleanup Control Table"
@@ -156,6 +161,7 @@ def setup_widgets(dbutils):
 
 
 def get_widgets(dbutils):
+    print(sys._getframe().f_code.co_name)
     """Get widgets for the notebook."""
     cleanup_control_table = dbutils.widgets.get("cleanup_control_table")
     mode = dbutils.widgets.get("mode")
@@ -189,6 +195,7 @@ def get_widgets(dbutils):
 
 
 def get_current_user(dbutils_instance=None, current_user_param=None):
+    print(sys._getframe().f_code.co_name)
     """Get current user from parameter or detected user."""
     # Set up Databricks environment variables and get current user
     detected_user = setup_databricks_environment(dbutils_instance)
@@ -202,6 +209,7 @@ def get_current_user(dbutils_instance=None, current_user_param=None):
 
 
 def get_notebook_path(dbutils_instance):
+    print(sys._getframe().f_code.co_name)
     """Get the current notebook path. Works across serverless, dedicated, and shared runtimes (DBR 13.3+)."""
     try:
         context_json = (
@@ -218,6 +226,7 @@ def get_notebook_path(dbutils_instance):
 
 
 def setup_notebook_variables(dbutils):
+    print(sys._getframe().f_code.co_name)
     """Setup notebook variables and validate required parameters."""
     try:
         job_id = dbutils.widgets.get("job_id")
@@ -269,6 +278,7 @@ def setup_notebook_variables(dbutils):
 
 
 def user_can_manage_schema(catalog_name: str, schema_name: str) -> bool:
+    print(sys._getframe().f_code.co_name)
     """
     Check if the current user has MANAGE permission on the schema.
     Queries system tables to check permissions without triggering grant operations.
@@ -334,6 +344,7 @@ def grant_user_permissions(
     volume_name: str = None,
     table_name: str = None,
 ) -> bool:
+    print(sys._getframe().f_code.co_name)
     """
     Grant read permissions to a user on created schema and volume.
 
@@ -385,6 +396,7 @@ def grant_group_permissions(
     volume_name: str = None,
     table_pattern: str = None,
 ) -> bool:
+    print(sys._getframe().f_code.co_name)
     """
     Grant read permissions to a group on created schema and volume.
     This is more scalable than per-user grants.
