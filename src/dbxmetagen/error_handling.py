@@ -1,8 +1,10 @@
 import time
 import random
 import pandas as pd
+import sys
 
 def exponential_backoff(retries, base_delay=1, max_delay=120, jitter=True):
+    print(sys._getframe().f_code.co_name)
     """
     Exponential backoff with optional jitter.
 
@@ -19,6 +21,7 @@ def exponential_backoff(retries, base_delay=1, max_delay=120, jitter=True):
 
 
 def validate_csv(csv_path: str) -> bool:
+    print(sys._getframe().f_code.co_name)
     """
     Validates the CSV to ensure that a catalog is never given without a schema and a schema name never given without a table name.
 
