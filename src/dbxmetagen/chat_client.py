@@ -4,6 +4,7 @@ around alternative API endpoints.
 Need to improve NotImplementedError, deprecated marks, and other indications of stubbed out code.
 """
 
+import sys
 import os
 import json
 import re
@@ -33,6 +34,7 @@ class ChatClient(ABC):
         temperature: float,
         **kwargs,
     ) -> Any:
+        print(sys._getframe().f_code.co_name)
         """Create a chat completion."""
         raise NotImplementedError
 
@@ -46,6 +48,7 @@ class ChatClient(ABC):
         temperature: float,
         **kwargs,
     ) -> BaseModel:
+        print(sys._getframe().f_code.co_name)
         """Create a structured chat completion."""
         raise NotImplementedError
 
@@ -54,6 +57,7 @@ class DatabricksClient(ChatClient):
     """Client for Databricks native chat completions."""
 
     def __init__(self):
+        print(sys._getframe().f_code.co_name)
         # Get credentials from environment (should be set in Databricks runtime)
         api_key = os.environ.get("DATABRICKS_TOKEN")
         if not api_key:
@@ -83,6 +87,7 @@ class DatabricksClient(ChatClient):
         temperature: float,
         **kwargs,
     ) -> ChatCompletion:
+        print(sys._getframe().f_code.co_name)
         """Create a chat completion using OpenAI client with Databricks endpoint."""
 
         response = self.openai_client.chat.completions.create(
@@ -110,6 +115,7 @@ class DatabricksClient(ChatClient):
         max_tokens: int,
         temperature: float,
     ) -> dict:
+        print(sys._getframe().f_code.co_name)
         """Extract token usage and log to MLFlow for benchmarking."""
 
         usage_info = {
@@ -161,6 +167,7 @@ class DatabricksClient(ChatClient):
         return usage_info
 
     def get_token_usage(self, response: ChatCompletion) -> dict:
+        print(sys._getframe().f_code.co_name)
         """Utility method to get token usage from a response."""
         if hasattr(response, "token_usage"):
             return response.token_usage
@@ -189,6 +196,7 @@ class DatabricksClient(ChatClient):
         temperature: float,
         **kwargs,
     ) -> BaseModel:
+        print(sys._getframe().f_code.co_name)
         """Create a structured chat completion using ChatDatabricks."""
         return (
             ChatDatabricks(
@@ -206,6 +214,7 @@ class OpenAISpecClient(ChatClient):
     """Client for OpenAI-compatible endpoints."""
 
     def __init__(self, base_url: str, api_key: str):
+        print(sys._getframe().f_code.co_name)
         self.openai_client = OpenAI(
             api_key=api_key,
             base_url=base_url,
@@ -219,6 +228,7 @@ class OpenAISpecClient(ChatClient):
         temperature: float,
         **kwargs,
     ) -> ChatCompletion:
+        print(sys._getframe().f_code.co_name)
         """Create a chat completion using OpenAI-compatible endpoint."""
         return self.openai_client.chat.completions.create(
             messages=messages,
@@ -237,6 +247,7 @@ class OpenAISpecClient(ChatClient):
         temperature: float,
         **kwargs,
     ) -> BaseModel:
+        print(sys._getframe().f_code.co_name)
         """Create a structured completion with JSON parsing for OpenAI-compatible endpoints."""
         if isinstance(messages, list) and messages:
             last_message = messages[-1].get("content", "")
@@ -283,6 +294,7 @@ class CustomChatSpecClient(ChatClient):
     """Client for custom chat endpoints that use 'engine' instead of 'model'."""
 
     def __init__(self, base_url: str, api_key: str):
+        print(sys._getframe().f_code.co_name)
         self.openai_client = OpenAI(
             api_key=api_key,
             base_url=base_url,
@@ -297,6 +309,7 @@ class CustomChatSpecClient(ChatClient):
         temperature: float,
         **kwargs,
     ) -> ChatCompletion:
+        print(sys._getframe().f_code.co_name)
         """Create a chat completion using custom endpoint with 'engine' parameter."""
         # Prepare the request payload with 'engine' instead of 'model'
         payload = {
@@ -359,6 +372,7 @@ class CustomChatSpecClient(ChatClient):
         temperature: float,
         **kwargs,
     ) -> BaseModel:
+        print(sys._getframe().f_code.co_name)
         """Create a structured completion with JSON parsing for custom endpoints."""
         if isinstance(messages, list) and messages:
             last_message = messages[-1].get("content", "")
@@ -410,6 +424,7 @@ class ChatClientFactory:
 
     @staticmethod
     def create_client(config) -> ChatClient:
+        print(sys._getframe().f_code.co_name)
         """Create a chat client based on the configuration."""
         chat_type = getattr(config, "chat_completion_type", "databricks")
 
@@ -441,6 +456,7 @@ class ChatClientFactory:
 
     @staticmethod
     def _get_secret_from_scope(scope: str, key: str) -> str:
+        print(sys._getframe().f_code.co_name)
         """Retrieve secret from Databricks secret scope."""
         if not scope or not key:
             raise ValueError(
