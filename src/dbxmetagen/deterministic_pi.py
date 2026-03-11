@@ -13,29 +13,32 @@ from datetime import datetime
 
 from src.dbxmetagen.config import MetadataConfig
 from src.dbxmetagen.user_utils import sanitize_user_identifier
+import sys
 
 
-def luhn_checksum(card_number):
-    """Check if a card number is valid using the Luhn algorithm."""
-    card_number = str(card_number).replace(" ", "").replace("-", "")
-    if not card_number.isdigit():
-        return False
-    if len(card_number) < 13 or len(card_number) > 19:
-        return False
-    sum_ = 0
-    alt = False
-    for digit in reversed(card_number):
-        d = int(digit)
-        if alt:
-            d = d * 2
-            if d > 9:
-                d -= 9
-        sum_ += d
-        alt = not alt
-    return sum_ % 10 == 0
+# def luhn_checksum(card_number):
+#     print(sys._getframe().f_code.co_name)
+#     """Check if a card number is valid using the Luhn algorithm."""
+#     card_number = str(card_number).replace(" ", "").replace("-", "")
+#     if not card_number.isdigit():
+#         return False
+#     if len(card_number) < 13 or len(card_number) > 19:
+#         return False
+#     sum_ = 0
+#     alt = False
+#     for digit in reversed(card_number):
+#         d = int(digit)
+#         if alt:
+#             d = d * 2
+#             if d > 9:
+#                 d -= 9
+#         sum_ += d
+#         alt = not alt
+#     return sum_ % 10 == 0
 
 
 def get_analyzer_engine(add_pci: bool = True, add_phi: bool = True) -> AnalyzerEngine:
+    print(sys._getframe().f_code.co_name)
     """Initialize Presidio AnalyzerEngine with PCI/PHI recognizers."""
     analyzer = AnalyzerEngine()
 
@@ -129,6 +132,7 @@ def analyze_column(
     language: str = "en",
     score_threshold: float = 0.5,
 ) -> List[List[RecognizerResult]]:
+    print(sys._getframe().f_code.co_name)
     """
     Analyze each cell in a column for PII/PHI/PCI entities.
     Only returns results above the score threshold to reduce false positives.
@@ -156,6 +160,7 @@ def classify_column(
     column_data: List[Any],
     score_threshold: float = 0.5,
 ) -> Tuple[str, List[str]]:
+    print(sys._getframe().f_code.co_name)
     """
     Classify a column as PII, PHI, PCI, or Non-sensitive.
     Returns the detected type and a list of detected entities.
@@ -266,6 +271,7 @@ def process_table(
     data: Dict[str, Any],
     score_threshold: float = 0.5,
 ) -> List[Dict[str, Any]]:
+    print(sys._getframe().f_code.co_name)
     """
     Process the input data, classify each column, and save results.
 
@@ -323,6 +329,7 @@ def process_table(
 
 
 def ensure_spacy_model(model_name: str = "en_core_web_lg"):
+    print(sys._getframe().f_code.co_name)
     """
     Load pre-installed spaCy model. Model should be installed via requirements.txt.
     """
@@ -337,6 +344,7 @@ def ensure_spacy_model(model_name: str = "en_core_web_lg"):
 
 
 def detect_pi(config, input_data: Dict[str, Any]) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Main function to process input data for PII/PHI/PCI detection.
     Uses presidio_score_threshold from config (default 0.6) to filter results.

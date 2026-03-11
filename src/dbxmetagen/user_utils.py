@@ -7,9 +7,11 @@ separated to avoid circular imports.
 
 import re
 from pyspark.sql import SparkSession
+import sys
 
 
 def get_current_user() -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Retrieves the current user.
 
@@ -22,6 +24,7 @@ def get_current_user() -> str:
 
 
 def sanitize_user_identifier(identifier: str) -> str:
+    print(sys._getframe().f_code.co_name)
     """
     Sanitizes user identifier for use in table/file names.
 
@@ -53,9 +56,10 @@ def sanitize_user_identifier(identifier: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_]", "_", identifier)
 
 
-def sanitize_email(email: str) -> str:
-    """
-    DEPRECATED: Use sanitize_user_identifier instead.
-    Backward compatibility wrapper for sanitize_user_identifier.
-    """
-    return sanitize_user_identifier(email)
+# def sanitize_email(email: str) -> str:
+#     print(sys._getframe().f_code.co_name)
+#     """
+#     DEPRECATED: Use sanitize_user_identifier instead.
+#     Backward compatibility wrapper for sanitize_user_identifier.
+#     """
+#     return sanitize_user_identifier(email)
