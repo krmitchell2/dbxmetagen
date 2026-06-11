@@ -1,0 +1,462 @@
+main
+get_dbr_version
+Databricks Runtime Version: client.1.13
+__init__
+load_yaml
+load_yaml
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+_parse_bool
+validate_csv
+validate_runtime_compatibility
+setup_mode_dependencies
+ensure_spacy_model
+setup_environment
+initialize_infrastructure
+setup_ddl
+sanitize_user_identifier
+create_tables
+get_control_table
+get_current_user
+sanitize_user_identifier
+setup_queue
+get_control_table
+get_current_user
+sanitize_user_identifier
+expand_schema_wildcards
+is_schema_wildcard
+load_table_names_from_csv
+Successfully loaded 0 table names from CSV
+sanitize_string_list
+expand_schema_wildcards
+ensure_fully_scoped_table_names
+upsert_table_names_to_control_table
+Upserting table names to control table ['hsh_analytics_dev.u_kmitchell.claims_sample_synthetic']...
+get_control_table
+get_current_user
+sanitize_user_identifier
+ensure_fully_scoped_table_names
+trim_whitespace_from_df
+2026-02-26 17:33:14 - metadata_processing - INFO - generate_and_persist_metadata - [generate_and_persist_metadata] Processing table hsh_analytics_dev.u_kmitchell.claims_sample_synthetic...
+Successfully merged table names into control table hsh_analytics_dev.metadata_results.metadata_control_kmitchell_hsh_lacounty_gov
+Running generate on... ['hsh_analytics_dev.u_kmitchell.claims_sample_synthetic']
+generate_and_persist_metadata
+claim_table
+get_control_table
+get_current_user
+sanitize_user_identifier
+Successfully claimed table hsh_analytics_dev.u_kmitchell.claims_sample_synthetic for task kmitchell@hsh.lacounty.gov
+process_and_add_ddl
+review_and_generate_metadata
+get_generated_metadata
+get_generated_metadata_data_aware
+read_table_with_type_conversion
+get_column_types_from_describe
+chunk_df
+count_df_columns
+sample_df
+determine_sampling_ratio
+Sampling ratio: 0.0
+Filtering 0 result rows down to 0 rows...
+create_prompt
+__init__
+convert_to_comment_input
+calculate_cell_length
+add_metadata_to_comment_input
+extract_column_metadata
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+get_table_metadata
+get_column_tags
+get_table_tags
+df_to_json
+get_table_constraints
+df_to_json
+get_table_comment
+df_to_json
+add_table_metadata_to_column_contents
+create_prompt_template
+detect_pi
+process_table
+sanitize_user_identifier
+get_analyzer_engine
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - CreditCardRecognizer supported languages: es, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - CreditCardRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - CreditCardRecognizer supported languages: pl, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - EsNifRecognizer supported languages: es, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - EsNieRecognizer supported languages: es, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItDriverLicenseRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItFiscalCodeRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItVatCodeRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItIdentityCardRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItPassportRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:33:49 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - PlPeselRecognizer supported languages: pl, registry supported languages: en
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+[PIPrompt] Presidio deterministic_results: {"deterministic_results": [{"column": "hvid", "classification": "Non-sensitive", "entities": []}, {"column": "claim_id", "classification": "Non-sensitive", "entities": []}, {"column": "claim_type", "classification": "Non-sensitive", "entities": []}, {"column": "date_service", "classification": "Non-...
+check_token_length_against_num_words
+create_generator
+from_context
+create_client
+__init__
+get_responses
+get_pi_response
+_get_chat_completion
+predict_chat_response
+create_structured_completion
+sample_df
+determine_sampling_ratio
+Sampling ratio: 0.0
+Filtering 0 result rows down to 0 rows...
+create_prompt
+__init__
+convert_to_comment_input
+calculate_cell_length
+add_metadata_to_comment_input
+extract_column_metadata
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+filter_extended_metadata_fields
+_filter_pi_mode
+add_column_metadata_to_column_contents
+get_column_tags
+get_table_metadata
+get_column_tags
+get_table_tags
+df_to_json
+get_table_constraints
+df_to_json
+get_table_comment
+df_to_json
+add_table_metadata_to_column_contents
+create_prompt_template
+detect_pi
+process_table
+sanitize_user_identifier
+get_analyzer_engine
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - CreditCardRecognizer supported languages: es, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - CreditCardRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - CreditCardRecognizer supported languages: pl, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - EsNifRecognizer supported languages: es, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - EsNieRecognizer supported languages: es, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItDriverLicenseRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItFiscalCodeRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItVatCodeRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItIdentityCardRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - ItPassportRecognizer supported languages: it, registry supported languages: en
+2026-02-26 17:34:21 - presidio-analyzer - WARNING - _is_language_supported_globally - Recognizer not added to registry because language is not supported by registry - PlPeselRecognizer supported languages: pl, registry supported languages: en
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+classify_column
+analyze_column
+[PIPrompt] Presidio deterministic_results: {"deterministic_results": [{"column": "procedure_units_billed", "classification": "Non-sensitive", "entities": []}, {"column": "procedure_modifier_1", "classification": "Non-sensitive", "entities": []}, {"column": "procedure_modifier_2", "classification": "Non-sensitive", "entities": []}, {"column":...
+check_token_length_against_num_words
+create_generator
+from_context
+create_client
+__init__
+get_responses
+get_pi_response
+_get_chat_completion
+predict_chat_response
+create_structured_completion
+replace_catalog_name
+append_column_rows
+Mapped presidio results for 20 columns
+replace_catalog_name
+append_column_rows
+Mapped presidio results for 15 columns
+rows_to_df
+define_row_schema
+rows_to_df
+split_and_hardcode_df
+split_name_for_df
+split_fully_scoped_table_name
+hardcode_classification
+replace_medical_information_with_phi
+eval_disable_medical_information_value
+set_protected_classification
+split_and_hardcode_df
+Number of rows being overridden... 1
+add_ddl_to_dfs
+add_column_ddl_to_pi_df
+_create_pi_information_ddl_func
+create_pi_table_df
+determine_table_classification
+2026-02-26 17:34:32 - metadata_processing - INFO - generate_and_persist_metadata - [generate_and_persist_metadata] Generating and persisting ddl for hsh_analytics_dev.u_kmitchell.claims_sample_synthetic...
+
+
+table_subclassification:
+ phi
+get_protected_classification_for_table
+
+
+table_subclassification:
+ phi
+table_classification protected
+table_subclassification phi
+set_protected_classification
+add_table_ddl_to_pi_df
+_create_table_pi_information_ddl_func
+create_and_persist_ddl
+Running create and persist ddl...
+get_current_user
+sanitize_user_identifier
+populate_log_table
+populate_log_table
+filter_and_write_ddl
+Filtering dataframe based on table name to write DDL to SQL file in volume...
+write_ddl_to_volume_spark_native
+create_folder_if_not_exists
+log_metadata_generation
+run_log_table_ddl
+[log_metadata_generation] DataFrame columns: ['table', 'tokenized_table', 'ddl_type', 'column_name', 'classification', 'type', 'confidence', 'presidio_results', '_created_at', 'catalog', 'schema', 'table_name', 'ddl', 'current_user', 'model', 'sample_size', 'max_tokens', 'temperature', 'columns_per_call', 'status', 'metadata_type']
+mark_as_deleted
+get_control_table
+get_current_user
+sanitize_user_identifier
+Marked hsh_analytics_dev.u_kmitchell.claims_sample_synthetic as deleted in the control table...
+_export_table_to_tsv
+get_current_user
+sanitize_user_identifier
+get_temp_metadata_log_table_name
+get_current_user
+sanitize_user_identifier
+create_folder_if_not_exists
+Writing to TSV file: /Volumes/hsh_analytics_dev/metadata_results/generated_metadata/kmitchell_hsh_lacounty_gov/20260226/exportable_run_logs/review_metadata_pi_20260226_173246.tsv
+output_df_pandas_to_tsv
+Successfully wrote TSV file to: /Volumes/hsh_analytics_dev/metadata_results/generated_metadata/kmitchell_hsh_lacounty_gov/20260226/exportable_run_logs/review_metadata_pi_20260226_173246.tsv
+Export completed successfully...
+sanitize_user_identifier
+mark_table_completed
+get_control_table
+get_current_user
+sanitize_user_identifier
+Marked table hsh_analytics_dev.u_kmitchell.claims_sample_synthetic as completed
+
+
+
+Trying to write to log table...
+
+
+
+write_to_log_table
+2026-02-26 17:36:19 - metadata_processing - INFO - generate_and_persist_metadata - [generate_and_persist_metadata] Log written for table hsh_analytics_dev.u_kmitchell.claims_sample_synthetic.
+Finished processing table hsh_analytics_dev.u_kmitchell.claims_sample_synthetic and writing to log table.
+grant_permissions_on_created_objects
+grant_user_permissions
+user_can_manage_schema
+_grant_permissions_to_groups
+_grant_permissions_to_users
+Permission grants completed successfully
+cleanup_resources
+get_temp_metadata_log_table_name
+get_current_user
+sanitize_user_identifier
+get_control_table
+get_current_user
+sanitize_user_identifier
+Cleaned up temp table: hsh_analytics_dev.metadata_results.temp_metadata_generation_log_kmitchell_hsh_lacounty_gov_20260226_173246

@@ -4,7 +4,7 @@ domains:
   clinical_operations:
     name: "Clinical Operations"
     description: "EHR data, patient care, clinical workflows, and provider operations"
-    keywords: ["ehr", "emr", "patient", "provider", "physician", "nurse", "clinical", "diagnosis", "procedure", "treatment", "care", "medical", "health", "hospital", "clinic", "encounter", "visit", "admission", "discharge", "order", "medication", "lab", "imaging", "vital", "observation", "note", "mrn"]
+    keywords: ["ehr", "emr", "patient", "client", "provider", "physician", "nurse", "clinical", "diagnosis", "procedure", "treatment", "care", "medical", "health", "hospital", "clinic", "encounter", "visit", "admission", "discharge", "order", "medication", "lab", "imaging", "vital", "observation", "note", "mrn"]
     subdomains:
       patient_care:
         name: "Patient Care & Treatment"
